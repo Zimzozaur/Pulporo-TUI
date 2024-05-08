@@ -1,0 +1,68 @@
+Body {
+    margin: 1 2;
+    height: 100%;
+    width: 100%;
+    background: $surface;
+}
+
+LeftNavMenu {
+    width: 16;
+    dock: left;
+    background: $surface-lighten-1;
+    padding: 1;
+}
+
+LeftNavMenu Button {
+    margin-top: 1;
+    content-align: center middle;
+}
+
+LeftNavMenu Button:hover {
+    background: $accent;
+    color: $text;
+    text-style: bold;
+}
+
+MainApp {
+    margin: 0 0 0 2;
+    background: $surface-lighten-1;
+}
+
+/* --------------------------------------------------- */
+/*                                                     */
+/*                  LEDGER SECTION                     */
+/*                                                     */
+/* --------------------------------------------------- */
+
+FlowSection {
+    layout: horizontal;
+    width: 21%;
+    align: left middle;
+}
+
+TypeSection {
+    layout: horizontal;
+    width: 26%;
+    align: left middle;
+}
+
+DateSection {
+    layout: horizontal;
+    width: 53%;
+    align: right middle;
+}
+
+LedgerMenu {
+    layout: horizontal;
+    height: 4;
+}
+
+LedgerMenu Button {
+    min-width: 1;
+}
+
+
+Table {
+    height: auto;
+}
+
