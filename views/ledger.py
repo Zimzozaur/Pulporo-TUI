@@ -35,7 +35,7 @@ class DateSection(Container):
     def compose(self) -> ComposeResult:
         yield Button('Prev Month', id='prev-month')
         yield Button('Custom Widget')
-        yield Button('Today')
+        yield Button('Today', id='today')
         yield Button('Next Month', id='next-month')
 
 
@@ -72,9 +72,12 @@ class LedgerTable(Container):
         table = self.query_one(Table)
         table.zebra_stripes = True
         table_data = self.table_data
-        table.add_columns(*table_data[0])
-        table.add_rows(table_data[1:])
-        table.cursor_type = "row"
+        if table_data:
+            table.add_columns(*table_data[0])
+            table.add_rows(table_data[1:])
+            table.cursor_type = "row"
+        else:
+            table.add_column('Create new records to fill the table 🤭')
 
 
 class Ledger(Container):
@@ -95,7 +98,6 @@ class Ledger(Container):
         button: Button = event.button
         if button.variant == 'primary':
             return
-        self.query_one(LedgerTable).remove()
 
         flow_section = {'outflows', 'inflows'}
         type_section = {'one-off', 'all', 'recurring'}
@@ -119,9 +121,16 @@ class Ledger(Container):
                 self.params['year'] += 1
                 self.params['month'] = 1
 
+        elif button.id == 'today':
+            if self.params['year'] == self.TODAY.year and self.params['month'] == self.TODAY.month:
+                return
+            self.params['year'] = self.TODAY.year
+            self.params['month'] = self.TODAY.month
+
+        self.query_one(LedgerTable).remove()
         self.mount(LedgerTable(table_data=self.request_to_table()))
 
-    def all_to_default_one_to_primary(self, iterable, bt: Button):
+    def all_to_default_one_to_primary(self, iterable, bt: Button) -> None:
         """Change all buttons to default variant and chosen to primary"""
         for obj_id in iterable:
             self.get_widget_by_id(obj_id).variant = 'default'
@@ -132,6 +141,10 @@ class Ledger(Container):
         endpoint = PULPORO_URL + self.ENDPOINT_URL
         response = get(endpoint, params=self.params)
         list_of_dicts: list[dict] = response.json()
+
+        # Escape if there is no data
+        if not list_of_dicts:
+            return []
 
         table_data = [tuple(key.capitalize() for key in ['No', *list_of_dicts[0]])]
         table_data.extend((num, *d.values()) for num, d in enumerate(list_of_dicts, start=1))
