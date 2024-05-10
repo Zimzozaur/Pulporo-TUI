@@ -82,13 +82,11 @@ class AppBody(App):
     ]
 
     def compose(self) -> ComposeResult:
-        yield Container(
-            Header(show_clock=False),
-            Body(
-                LeftNavMenu(),
-                MainApp(Ledger(), id='MainApp')
-            )
-        )
+        with Container():
+            yield Header(show_clock=False)
+            with Body():
+                yield LeftNavMenu()
+                yield MainApp(Ledger(), id='MainApp')
         yield Footer()
 
 
