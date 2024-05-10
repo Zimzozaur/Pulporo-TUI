@@ -52,6 +52,10 @@ DateSection {
     align: right middle;
 }
 
+#month-button {
+    color: $secondary;
+}
+
 LedgerMenu {
     layout: horizontal;
     height: 4;
