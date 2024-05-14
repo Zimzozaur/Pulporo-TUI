@@ -1,12 +1,9 @@
 from datetime import datetime
 
-from textual.events import Click
-from textual.widget import Widget
-
-from settings import PULPORO_URL
-
 from requests import get
 
+from textual.events import Click
+from textual.widget import Widget
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal
@@ -15,6 +12,8 @@ from textual.widgets import (
     Button,
     DataTable,
 )
+
+from settings import PULPORO_URL
 
 MONTHS = [
     "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -41,14 +40,15 @@ class TypeSection(Container):
 
 class DateSection(Container):
     """Hold Buttons and widget to switch target date"""
-    def __init__(self, data_dict, *children: Widget):
+
+    def __init__(self, date_dict, *children: Widget):
         super().__init__(*children)
-        self.data_dict = data_dict
+        self.date_dict = date_dict
 
     def compose(self) -> ComposeResult:
         yield Button('Prev Month', id='prev-month')
         yield MonthButton(
-            f"{MONTHS[self.data_dict['month'] - 1]} {self.data_dict['year']}",
+            f"{MONTHS[self.date_dict['month'] - 1]} {self.date_dict['year']}",
             id='month-button'
         )
         yield Button('Today', id='today')
@@ -68,16 +68,16 @@ class MonthsPopup(ModalScreen):
         'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12
     }
 
-    def __init__(self, data_dict) -> None:
+    def __init__(self, date_dict) -> None:
         super().__init__()
-        self.data_dict: dict = data_dict
-        self.popup_year: int = self.data_dict['year']
+        self.date_dict: dict = date_dict
+        self.popup_year: int = self.date_dict['year']
 
     def compose(self) -> ComposeResult:
         with Container(id='month-popup-body'):
             with Horizontal(id='year-section'):
                 yield Button('⬅️', id='prev-year', classes='year-bt')
-                yield Button(f'{self.data_dict['year']}', id='popup-year', classes='year-bt')
+                yield Button(f'{self.date_dict['year']}', id='popup-year', classes='year-bt')
                 yield Button('➡️', id='next-year', classes='year-bt')
             with Horizontal():
                 yield Button('Jan', id='jan', classes='month-bt')
@@ -95,10 +95,14 @@ class MonthsPopup(ModalScreen):
                 yield Button('Nov', id='nov', classes='month-bt')
                 yield Button('Dec', id='dec', classes='month-bt')
 
+    def on_mount(self):
+        self.color_button_if_this_year()
+
     @on(Button.Pressed, '.month-bt')
     def month_button(self, event: Button.Pressed):
-        self.data_dict['month']: int = self.MONTHS_DICT[event.button.id]
-        self.data_dict['year']: int = self.popup_year
+        """Change query parameters of Ledger"""
+        self.date_dict['month']: int = self.MONTHS_DICT[event.button.id]
+        self.date_dict['year']: int = self.popup_year
         self.dismiss(True)
 
     @on(Button.Pressed, '#prev-year')
@@ -106,39 +110,60 @@ class MonthsPopup(ModalScreen):
         """Change Display year to one before"""
         self.popup_year -= 1
         self.query_one('#popup-year').label = str(self.popup_year)
+        self.color_button_if_this_year()
 
     @on(Button.Pressed, '#next-year')
     def change_year_next(self):
         """Change Display year to next one"""
         self.popup_year += 1
         self.query_one('#popup-year').label = str(self.popup_year)
+        self.color_button_if_this_year()
 
     @on(Button.Pressed, '#popup-year')
     def this_year(self, event: Button.Pressed):
-        event.button.label = str(datetime.now().year)
-        self.popup_year = self.data_dict['year']
+        self.popup_year = self.date_dict['year']
+        event.button.label = str(self.popup_year)
+        self.color_button_if_this_year()
 
     def on_click(self, event: Click):
         """Remove widget from DOM when clicked on background"""
         if self.get_widget_at(event.screen_x, event.screen_y)[0] is self:
             self.dismiss(False)
 
+    def color_button_if_this_year(self):
+        """
+        Change year and month buttons to primary
+        when popup set to this year
+        and to default on other year
+        """
+        def change_color(color):
+            month_abbreviations = MONTHS[self.date_dict['month'] - 1].lower()
+            self.query_one(f"#{month_abbreviations}").variant = color
+            self.query_one('#popup-year').variant = color
+
+        if self.popup_year == self.date_dict['year']:
+            change_color('primary')
+        else:
+            change_color('default')
+
 
 class LedgerMenu(Container):
-    def __init__(self, data_dict):
+    def __init__(self, date_dict):
         super().__init__()
-        self.data_dict = data_dict
+        self.date_dict = date_dict
 
     """Hold all menu button containers"""
+
     def compose(self) -> ComposeResult:
         yield FlowSection()
         yield TypeSection()
-        yield DateSection(data_dict=self.data_dict)
+        yield DateSection(date_dict=self.date_dict)
 
 
 class Table(DataTable):
     """Table that renders data from server"""
     pass
+
 
 class LedgerTable(Container):
     """Hold Table related components"""
@@ -172,7 +197,7 @@ class Ledger(Container):
     }
 
     def compose(self) -> ComposeResult:
-        yield LedgerMenu(data_dict=self.params)
+        yield LedgerMenu(date_dict=self.params)
         yield LedgerTable(table_data=self.request_table_data())
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
@@ -225,7 +250,7 @@ class Ledger(Container):
         self.get_widget_by_id('month-button').label = new_name
 
     @on(Button.Pressed, '#month-button')
-    def month_button_pressed(self, event: Button.Pressed):
+    def month_button_pressed(self):
         """Open months popup"""
         def swap_table_to_new_update_month_button(boolean):
             if boolean:
@@ -251,4 +276,3 @@ class Ledger(Container):
         table_data = [tuple(key.capitalize() for key in ['No', *list_of_dicts[0]])]
         table_data.extend((num, *d.values()) for num, d in enumerate(list_of_dicts, start=1))
         return table_data
-
