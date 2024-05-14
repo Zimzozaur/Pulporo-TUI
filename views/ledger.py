@@ -1,9 +1,13 @@
 from datetime import datetime
 
+from textual.events import Click
+from textual.widget import Widget
+
 from settings import PULPORO_URL
 
 from requests import get
 
+from textual import on
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal
 from textual.screen import ModalScreen
@@ -12,58 +16,10 @@ from textual.widgets import (
     DataTable,
 )
 
-ENDPOINT_URL = 'outflows'
-TODAY = datetime.now()
-
-PARAMS = {
-    'year': TODAY.year,
-    'month': TODAY.month,
-}
-MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-
-
-def request_table_data() -> list[tuple]:
-    """Call Pulporo endpoint and return list of tuples"""
-    endpoint = PULPORO_URL + ENDPOINT_URL
-    response = get(endpoint, params=PARAMS)
-    list_of_dicts: list[dict] = response.json()
-
-    # Escape if there is no data
-    if not list_of_dicts:
-        return []
-
-    table_data = [tuple(key.capitalize() for key in ['No', *list_of_dicts[0]])]
-    table_data.extend((num, *d.values()) for num, d in enumerate(list_of_dicts, start=1))
-    return table_data
-
-
-class MonthsPopup(ModalScreen):
-    def compose(self) -> ComposeResult:
-        with Horizontal():
-            yield Button('⬅️')
-            yield Button('TEXT')
-            yield Button('➡️')
-
-        with Container():
-            with Horizontal():
-                yield Button('Jan', id='jan')
-                yield Button('Feb', id='feb')
-                yield Button('Mar', id='mar')
-                yield Button('Apr', id='apr')
-            with Horizontal():
-                yield Button('May', id='may')
-                yield Button('Jun', id='jun')
-                yield Button('Jul', id='jul')
-                yield Button('Aug', id='aug')
-            with Horizontal():
-                yield Button('Sep', id='sep')
-                yield Button('Oct', id='oct')
-                yield Button('Nov', id='nov')
-                yield Button('Dec', id='dec')
-
-
-class MonthButton(Button):
-    pass
+MONTHS = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+]
 
 
 class FlowSection(Container):
@@ -84,42 +40,115 @@ class TypeSection(Container):
 
 
 class DateSection(Container):
-    """Hold Buttons and widget to switch targe date"""
+    """Hold Buttons and widget to switch target date"""
+    def __init__(self, data_dict, *children: Widget):
+        super().__init__(*children)
+        self.data_dict = data_dict
+
     def compose(self) -> ComposeResult:
         yield Button('Prev Month', id='prev-month')
-        yield MonthButton(f"{MONTHS[PARAMS['month'] - 1]} {PARAMS['year']}", id='month-button')
+        yield MonthButton(
+            f"{MONTHS[self.data_dict['month'] - 1]} {self.data_dict['year']}",
+            id='month-button'
+        )
         yield Button('Today', id='today')
         yield Button('Next Month', id='next-month')
 
 
+class MonthButton(Button):
+    """
+    On click display month calendar.
+    Does not request on click
+    """
+
+
+class MonthsPopup(ModalScreen):
+    MONTHS_DICT = {
+        'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4, 'may': 5, 'jun': 6,
+        'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12
+    }
+
+    def __init__(self, data_dict) -> None:
+        super().__init__()
+        self.data_dict: dict = data_dict
+        self.popup_year: int = self.data_dict['year']
+
+    def compose(self) -> ComposeResult:
+        with Container(id='month-popup-body'):
+            with Horizontal(id='year-section'):
+                yield Button('⬅️', id='prev-year', classes='year-bt')
+                yield Button(f'{self.data_dict['year']}', id='popup-year', classes='year-bt')
+                yield Button('➡️', id='next-year', classes='year-bt')
+            with Horizontal():
+                yield Button('Jan', id='jan', classes='month-bt')
+                yield Button('Feb', id='feb', classes='month-bt')
+                yield Button('Mar', id='mar', classes='month-bt')
+                yield Button('Apr', id='apr', classes='month-bt')
+            with Horizontal():
+                yield Button('May', id='may', classes='month-bt')
+                yield Button('Jun', id='jun', classes='month-bt')
+                yield Button('Jul', id='jul', classes='month-bt')
+                yield Button('Aug', id='aug', classes='month-bt')
+            with Horizontal():
+                yield Button('Sep', id='sep', classes='month-bt')
+                yield Button('Oct', id='oct', classes='month-bt')
+                yield Button('Nov', id='nov', classes='month-bt')
+                yield Button('Dec', id='dec', classes='month-bt')
+
+    @on(Button.Pressed, '.month-bt')
+    def month_button(self, event: Button.Pressed):
+        self.data_dict['month']: int = self.MONTHS_DICT[event.button.id]
+        self.data_dict['year']: int = self.popup_year
+        self.dismiss(True)
+
+    @on(Button.Pressed, '#prev-year')
+    def change_year_back(self):
+        """Change Display year to one before"""
+        self.popup_year -= 1
+        self.query_one('#popup-year').label = str(self.popup_year)
+
+    @on(Button.Pressed, '#next-year')
+    def change_year_next(self):
+        """Change Display year to next one"""
+        self.popup_year += 1
+        self.query_one('#popup-year').label = str(self.popup_year)
+
+    @on(Button.Pressed, '#popup-year')
+    def this_year(self, event: Button.Pressed):
+        event.button.label = str(datetime.now().year)
+        self.popup_year = self.data_dict['year']
+
+    def on_click(self, event: Click):
+        """Remove widget from DOM when clicked on background"""
+        if self.get_widget_at(event.screen_x, event.screen_y)[0] is self:
+            self.dismiss(False)
+
+
 class LedgerMenu(Container):
+    def __init__(self, data_dict):
+        super().__init__()
+        self.data_dict = data_dict
+
     """Hold all menu button containers"""
     def compose(self) -> ComposeResult:
         yield FlowSection()
         yield TypeSection()
-        yield DateSection()
+        yield DateSection(data_dict=self.data_dict)
 
 
 class Table(DataTable):
     """Table that renders data from server"""
     pass
 
-
-class TablePagination(Container):
-    """Menu to query data ranges"""
-    pass
-
-
 class LedgerTable(Container):
     """Hold Table related components"""
 
-    def __init__(self, *args, **kwargs):
-        self.table_data = kwargs.pop('table_data')
-        super().__init__(*args, **kwargs)
+    def __init__(self, table_data):
+        super().__init__()
+        self.table_data = table_data
 
     def compose(self) -> ComposeResult:
         yield Table()
-        yield TablePagination()
 
     def on_mount(self):
         table = self.query_one(Table)
@@ -135,16 +164,21 @@ class LedgerTable(Container):
 
 class Ledger(Container):
     """Main view wrapper"""
+    ENDPOINT_URL = 'outflows'
+    TODAY = datetime.now()
+    params = {
+        'year': TODAY.year,
+        'month': TODAY.month,
+    }
+
     def compose(self) -> ComposeResult:
-        yield LedgerMenu()
-        yield LedgerTable(table_data=request_table_data())
+        yield LedgerMenu(data_dict=self.params)
+        yield LedgerTable(table_data=self.request_table_data())
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Send request and swap table on click"""
-        global ENDPOINT_URL, PARAMS
-
         button: Button = event.button
-        if button.variant == 'primary':
+        if button.variant == 'primary' or button.id == 'month-button':
             return
 
         flow_section = {'outflows', 'inflows'}
@@ -152,7 +186,7 @@ class Ledger(Container):
         month_section = {'prev-month', 'next-month'}
 
         if button.id in flow_section:
-            ENDPOINT_URL = 'inflows' if button.id == 'inflows' else 'outflows'
+            self.ENDPOINT_URL = 'inflows' if button.id == 'inflows' else 'outflows'
             self.all_to_default_one_to_primary(flow_section, button)
 
         elif button.id in type_section:
@@ -161,24 +195,24 @@ class Ledger(Container):
         elif button.id in month_section:
             # Change month before request
             month_operation = -1 if button.id == 'prev-month' else 1
-            PARAMS['month'] += month_operation
-            if PARAMS['month'] == 0:
-                PARAMS['year'] -= 1
-                PARAMS['month'] = 12
-            elif PARAMS['month'] == 13:
-                PARAMS['year'] += 1
-                PARAMS['month'] = 1
+            self.params['month'] += month_operation
+            if self.params['month'] == 0:
+                self.params['year'] -= 1
+                self.params['month'] = 12
+            elif self.params['month'] == 13:
+                self.params['year'] += 1
+                self.params['month'] = 1
             self.change_date_on_month_button()
 
         elif button.id == 'today':
-            if PARAMS['year'] == TODAY.year and PARAMS['month'] == TODAY.month:
+            if self.params['year'] == self.TODAY.year and self.params['month'] == self.TODAY.month:
                 return
-            PARAMS['year'] = TODAY.year
-            PARAMS['month'] = TODAY.month
+            self.params['year'] = self.TODAY.year
+            self.params['month'] = self.TODAY.month
             self.change_date_on_month_button()
 
         self.query_one(LedgerTable).remove()
-        self.mount(LedgerTable(table_data=request_table_data()))
+        self.mount(LedgerTable(table_data=self.request_table_data()))
 
     def all_to_default_one_to_primary(self, iterable, bt: Button) -> None:
         """Change all buttons to default variant and chosen to primary"""
@@ -187,7 +221,34 @@ class Ledger(Container):
         bt.variant = 'primary'
 
     def change_date_on_month_button(self):
-        new_name = f"{MONTHS[PARAMS['month'] - 1]} {PARAMS['year']}"
+        new_name = f"{MONTHS[self.params['month'] - 1]} {self.params['year']}"
         self.get_widget_by_id('month-button').label = new_name
 
+    @on(Button.Pressed, '#month-button')
+    def month_button_pressed(self, event: Button.Pressed):
+        """Open months popup"""
+        def swap_table_to_new_update_month_button(boolean):
+            if boolean:
+                self.query_one(LedgerTable).remove()
+                self.mount(LedgerTable(table_data=self.request_table_data()))
+                self.change_date_on_month_button()
+
+        self.app.push_screen(
+            MonthsPopup(self.params),
+            swap_table_to_new_update_month_button
+        )
+
+    def request_table_data(self) -> list[tuple]:
+        """Call Pulporo endpoint and return list of tuples"""
+        endpoint = PULPORO_URL + self.ENDPOINT_URL
+        response = get(endpoint, params=self.params)
+        list_of_dicts: list[dict] = response.json()
+
+        # Escape if there is no data
+        if not list_of_dicts:
+            return []
+
+        table_data = [tuple(key.capitalize() for key in ['No', *list_of_dicts[0]])]
+        table_data.extend((num, *d.values()) for num, d in enumerate(list_of_dicts, start=1))
+        return table_data
 

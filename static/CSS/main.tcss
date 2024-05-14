@@ -52,9 +52,46 @@ DateSection {
     align: right middle;
 }
 
-#month-button {
+MonthButton {
     color: $secondary;
 }
+
+MonthsPopup {
+    width: auto;
+    height: auto;
+    align: right top;
+}
+
+#month-popup-body {
+    width: 28;
+    height: 14;
+    offset-x: -6;
+    offset-y: 2;
+    content-align: center middle;
+    padding: 1 2;
+}
+
+.year-bt {
+    min-width: 8;
+}
+
+.year-bt:hover {
+    background: $accent;
+    color: $text;
+    text-style: bold;
+}
+
+
+.month-bt {
+    min-width: 6;
+}
+
+.month-bt:hover {
+    background: $accent;
+    color: $text;
+    text-style: bold;
+}
+
 
 LedgerMenu {
     layout: horizontal;

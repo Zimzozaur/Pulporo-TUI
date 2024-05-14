@@ -1,4 +1,5 @@
 from textual.app import App, ComposeResult
+from textual import on
 from textual.containers import Container
 from textual.widgets import (
     Button,
@@ -7,7 +8,7 @@ from textual.widgets import (
 )
 
 from views.dashboard import Dashboard
-from views.ledger import Ledger
+from views.ledger import Ledger, MonthsPopup
 from views.recurring import Recurring
 from views.investment import Investment
 from views.liabilities import Liabilities
@@ -80,13 +81,17 @@ class AppBody(App):
     BINDINGS = [
         ('ctrl+d', 'toggle_dark', 'Dark Mode'),
     ]
+    SCREENS = {
+        'month-popup': MonthsPopup
+    }
 
     def compose(self) -> ComposeResult:
         with Container():
             yield Header(show_clock=False)
             with Body():
                 yield LeftNavMenu()
-                yield MainApp(Ledger(), id='MainApp')
+                with MainApp(id='MainApp'):
+                    yield Ledger(id='ledger')
         yield Footer()
 
 
