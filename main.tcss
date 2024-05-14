@@ -56,7 +56,7 @@ MonthButton {
     color: $secondary;
 }
 
-MonthsPopup {
+MonthYearPopup {
     width: auto;
     height: auto;
     align: right top;

@@ -77,7 +77,7 @@ class AppBody(App):
     """Container for the whole app"""
 
     TITLE = 'Pulporo 🐙'
-    CSS_PATH = 'static/CSS/main.tcss'
+    CSS_PATH = 'main.tcss'
     BINDINGS = [
         ('ctrl+d', 'toggle_dark', 'Dark Mode'),
     ]
