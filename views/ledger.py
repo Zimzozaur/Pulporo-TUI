@@ -12,7 +12,6 @@ from textual.widgets import (
 )
 
 from screens.month_year_popup import MonthYearPopup
-from settings import PULPORO_URL
 
 MONTHS = [
     "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -104,6 +103,7 @@ class LedgerTable(Container):
 class Ledger(Container):
     """Main view wrapper"""
     ENDPOINT_URL = 'outflows'
+    PULPORO_API_URL:str = "TEST"
     TODAY = datetime.now()
     params = {
         'year': TODAY.year,
@@ -179,7 +179,7 @@ class Ledger(Container):
 
     def request_table_data(self) -> list[tuple]:
         """Call Pulporo endpoint and return list of tuples"""
-        endpoint = PULPORO_URL + self.ENDPOINT_URL
+        endpoint = self.PULPORO_API_URL + self.ENDPOINT_URL
         response = get(endpoint, params=self.params)
         list_of_dicts: list[dict] = response.json()
 

@@ -1,3 +1,4 @@
+import os
 from textual.app import App, ComposeResult
 from textual.containers import Container
 from textual.widgets import (
@@ -84,20 +85,30 @@ class AppBody(App):
         ('ctrl+d', 'toggle_dark', 'Dark Mode'),
         ('ctrl+n', 'create_new', 'Create New'),
     ]
-
+    config={}
     def compose(self) -> ComposeResult:
+        # create the ledger widget with the URL in the config
+        l = Ledger(id='ledger')
+        l.PULPORO_API_URL = self.config["PULPORO_API_URL"]
         with Container():
             yield Header(show_clock=False)
             with Body():
                 yield LeftNavMenu()
                 with MainApp(id='MainApp'):
-                    yield Ledger(id='ledger')
+                    yield l
         yield Footer()
 
     def action_create_new(self):
         self.push_screen(CreateNewPopup('CreateNewPopup'))
 
+def load_globals():
+    return dict(
+        # here is the static by default value
+        PULPORO_API_URL=os.getenv("PULPORO_API_URL","http://localhost:8000")
+    )
 
 if __name__ == '__main__':
-    AppBody().run()
+    app = AppBody()
+    app.config = load_globals()
+    app.run()
 
