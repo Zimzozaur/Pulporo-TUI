@@ -12,7 +12,7 @@ from textual.widgets import (
     DataTable,
 )
 
-from apiclient import PulporoPyClient
+from api_client import PulporoPyClient
 from screens.month_year_popup import MonthYearPopup
 
 
