@@ -45,6 +45,7 @@ class MonthYearPopup(ModalScreen):
                 yield Button('Dec', id='dec', classes='month-bt')
 
     def on_mount(self):
+        """Color button on mount"""
         self.color_button_if_this_year()
 
     @on(Button.Pressed, '.month-bt')

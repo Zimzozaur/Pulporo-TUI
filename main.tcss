@@ -1,3 +1,9 @@
+/* --------------------------------------------------- */
+/*                                                     */
+/*                   MAIN SECTION                      */
+/*                                                     */
+/* --------------------------------------------------- */
+
 Body {
     margin: 1 2;
     height: 100%;
@@ -56,6 +62,27 @@ MonthButton {
     color: $secondary;
 }
 
+LedgerMenu {
+    layout: horizontal;
+    height: 4;
+}
+
+LedgerMenu Button {
+    min-width: 1;
+}
+
+
+Table {
+    height: auto;
+}
+
+/* --------------------------------------------------- */
+/*                                                     */
+/*                     Month Popup                     */
+/*                                                     */
+/* --------------------------------------------------- */
+
+
 MonthYearPopup {
     width: auto;
     height: auto;
@@ -92,18 +119,27 @@ MonthYearPopup {
     text-style: bold;
 }
 
+/* --------------------------------------------------- */
+/*                                                     */
+/*                  Create New Popup                   */
+/*                                                     */
+/* --------------------------------------------------- */
 
-LedgerMenu {
-    layout: horizontal;
-    height: 4;
-}
-
-LedgerMenu Button {
-    min-width: 1;
-}
-
-
-Table {
+CreateNewPopup {
+    align: center middle;
+    width: auto;
     height: auto;
+}
+
+#new-popup-body {
+    min-width: 70;
+    min-height: 40;
+    width: 1;
+    height: 1;
+    background: $panel;
+}
+
+#new-popup-title {
+
 }
 

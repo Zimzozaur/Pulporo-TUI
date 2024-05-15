@@ -7,6 +7,8 @@ from textual.widgets import (
 )
 
 from screens.month_year_popup import MonthYearPopup
+from screens.create_new import CreateNewPopup
+
 from views.dashboard import Dashboard
 from views.ledger import Ledger
 from views.recurring import Recurring
@@ -80,10 +82,8 @@ class AppBody(App):
     CSS_PATH = 'main.tcss'
     BINDINGS = [
         ('ctrl+d', 'toggle_dark', 'Dark Mode'),
+        ('ctrl+n', 'create_new', 'Create New'),
     ]
-    SCREENS = {
-        'month-popup': MonthYearPopup
-    }
 
     def compose(self) -> ComposeResult:
         with Container():
@@ -93,6 +93,9 @@ class AppBody(App):
                 with MainApp(id='MainApp'):
                     yield Ledger(id='ledger')
         yield Footer()
+
+    def action_create_new(self):
+        self.push_screen(CreateNewPopup('CreateNewPopup'))
 
 
 if __name__ == '__main__':
