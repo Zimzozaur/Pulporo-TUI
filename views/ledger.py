@@ -183,8 +183,6 @@ class Ledger(Container):
 
     def request_table_data(self) -> list[tuple]:
         """Call Pulporo endpoint and return list of tuples"""
-        
-
         list_of_dicts = self.client.get_flow(self.ENDPOINT_URL,self.params)
 
         # Escape if there is no data
@@ -194,10 +192,3 @@ class Ledger(Container):
         table_data = [tuple(key.capitalize() for key in ['No', *list_of_dicts[0]])]
         table_data.extend((num, *d.values()) for num, d in enumerate(list_of_dicts, start=1))
         return table_data
-
-
-
-def call_endpoint(endpoint_url,params_dict):
-    response = get(endpoint_url, params=params_dict)
-    list_of_dicts: list[dict] = response.json()
-    return list_of_dicts
