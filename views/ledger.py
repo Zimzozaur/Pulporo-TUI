@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List, Literal
 
 from requests import get
 
@@ -179,9 +180,12 @@ class Ledger(Container):
 
     def request_table_data(self) -> list[tuple]:
         """Call Pulporo endpoint and return list of tuples"""
-        endpoint = PULPORO_URL + self.ENDPOINT_URL
-        response = get(endpoint, params=self.params)
-        list_of_dicts: list[dict] = response.json()
+
+        if PULPORO_URL=="TEST":
+            list_of_dicts = test_static_data(self.ENDPOINT_URL)
+        else:
+            endpoint = PULPORO_URL + self.ENDPOINT_URL
+            list_of_dicts = call_endpoint(endpoint,self.params)
 
         # Escape if there is no data
         if not list_of_dicts:
@@ -190,3 +194,33 @@ class Ledger(Container):
         table_data = [tuple(key.capitalize() for key in ['No', *list_of_dicts[0]])]
         table_data.extend((num, *d.values()) for num, d in enumerate(list_of_dicts, start=1))
         return table_data
+
+
+
+def test_static_data(endpoint: Literal['outflows', 'inflows']) -> List[dict]:
+    """return some testing static data """
+    # description of the dict found in the backend file "finanace/serializer.py" 
+
+    # if returning outflow stuff :
+    if endpoint == "outflows":
+        
+        return [{
+        "title":"some title",
+        "value":0.4,
+        "date":"Someday",
+        "prediction":"You gonna get rich!",
+        "notes": "Have fun",
+    }]
+
+    else :
+        return [{
+            "title":"some title",
+            "value":0.4,
+            "date":"Someday",
+            "notes": "Have fun",
+        }]
+
+def call_endpoint(endpoint_url,params_dict):
+    response = get(endpoint_url, params=params_dict)
+    list_of_dicts: list[dict] = response.json()
+    return list_of_dicts

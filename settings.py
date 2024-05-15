@@ -1,1 +1,1 @@
-PULPORO_URL = 'http://localhost:8000/'
+PULPORO_URL = 'TEST'
