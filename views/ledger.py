@@ -12,8 +12,10 @@ from textual.widgets import (
     DataTable,
 )
 
+from apiclient import PulporoPyClient
 from screens.month_year_popup import MonthYearPopup
 from settings import PULPORO_URL
+from tests.data import test_static_data
 
 MONTHS = [
     "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -110,7 +112,8 @@ class Ledger(Container):
         'year': TODAY.year,
         'month': TODAY.month,
     }
-
+    client = PulporoPyClient(PULPORO_URL) if PULPORO_URL!="TEST" else PulporoPyStaticClient()
+    
     def compose(self) -> ComposeResult:
         yield LedgerMenu(date_dict=self.params)
         yield LedgerTable(table_data=self.request_table_data())
@@ -180,12 +183,9 @@ class Ledger(Container):
 
     def request_table_data(self) -> list[tuple]:
         """Call Pulporo endpoint and return list of tuples"""
+        
 
-        if PULPORO_URL=="TEST":
-            list_of_dicts = test_static_data(self.ENDPOINT_URL)
-        else:
-            endpoint = PULPORO_URL + self.ENDPOINT_URL
-            list_of_dicts = call_endpoint(endpoint,self.params)
+        list_of_dicts = self.client.get_flow(self.ENDPOINT_URL,self.params)
 
         # Escape if there is no data
         if not list_of_dicts:
@@ -196,29 +196,6 @@ class Ledger(Container):
         return table_data
 
 
-
-def test_static_data(endpoint: Literal['outflows', 'inflows']) -> List[dict]:
-    """return some testing static data """
-    # description of the dict found in the backend file "finanace/serializer.py" 
-
-    # if returning outflow stuff :
-    if endpoint == "outflows":
-        
-        return [{
-        "title":"some title",
-        "value":0.4,
-        "date":"Someday",
-        "prediction":"You gonna get rich!",
-        "notes": "Have fun",
-    }]
-
-    else :
-        return [{
-            "title":"some title",
-            "value":0.4,
-            "date":"Someday",
-            "notes": "Have fun",
-        }]
 
 def call_endpoint(endpoint_url,params_dict):
     response = get(endpoint_url, params=params_dict)
