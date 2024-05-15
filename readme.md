@@ -31,7 +31,12 @@ If you don't have Python 3.12 or SQLite installed on your system, follow these s
    ```
    pip install -r requirements.txt
    ```
-6. Run app in terminal - Before run [Pulporo API](https://github.com/Zimzozaur/Pulporo-API) server
+6. Set env var
+```bash
+# using export 
+export PULPORO_API_URL="what ever you like"
+```
+7. Run app in terminal - Before run [Pulporo API](https://github.com/Zimzozaur/Pulporo-API) server
    ```
     python main.py
    ```

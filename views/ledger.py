@@ -14,8 +14,7 @@ from textual.widgets import (
 
 from apiclient import PulporoPyClient
 from screens.month_year_popup import MonthYearPopup
-from settings import PULPORO_URL
-from tests.data import test_static_data
+
 
 MONTHS = [
     "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -107,13 +106,13 @@ class LedgerTable(Container):
 class Ledger(Container):
     """Main view wrapper"""
     ENDPOINT_URL = 'outflows'
+    PULPORO_API_URL: str = "TEST"
     TODAY = datetime.now()
     params = {
         'year': TODAY.year,
         'month': TODAY.month,
     }
-    client = PulporoPyClient(PULPORO_URL) if PULPORO_URL!="TEST" else PulporoPyStaticClient()
-    
+
     def compose(self) -> ComposeResult:
         yield LedgerMenu(date_dict=self.params)
         yield LedgerTable(table_data=self.request_table_data())
@@ -183,7 +182,9 @@ class Ledger(Container):
 
     def request_table_data(self) -> list[tuple]:
         """Call Pulporo endpoint and return list of tuples"""
-        list_of_dicts = self.client.get_flow(self.ENDPOINT_URL,self.params)
+        endpoint = self.PULPORO_API_URL + self.ENDPOINT_URL
+        response = get(endpoint, params=self.params)
+        list_of_dicts: list[dict] = response.json()
 
         # Escape if there is no data
         if not list_of_dicts:

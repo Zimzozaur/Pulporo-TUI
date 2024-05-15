@@ -1,1 +1,0 @@
-PULPORO_URL = 'TEST'
