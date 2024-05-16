@@ -85,27 +85,30 @@ class AppBody(App):
         ('ctrl+d', 'toggle_dark', 'Dark Mode'),
         ('ctrl+n', 'create_new', 'Create New'),
     ]
-    config={}
+    config = {}
+
     def compose(self) -> ComposeResult:
         # create the ledger widget with the URL in the config
-        l = Ledger(id='ledger')
-        l.PULPORO_API_URL = self.config["PULPORO_API_URL"]
+        ledger = Ledger(id='ledger')
+        ledger.PULPORO_API_URL = self.config["PULPORO_API_URL"]
         with Container():
             yield Header(show_clock=False)
             with Body():
                 yield LeftNavMenu()
                 with MainApp(id='MainApp'):
-                    yield l
+                    yield ledger
         yield Footer()
 
     def action_create_new(self):
         self.push_screen(CreateNewPopup('CreateNewPopup'))
 
+
 def load_globals():
     return dict(
         # here is the static by default value
-        PULPORO_API_URL=os.getenv("PULPORO_API_URL","http://localhost:8000")
+        PULPORO_API_URL=os.getenv("PULPORO_API_URL", "http://localhost:8000/")
     )
+
 
 if __name__ == '__main__':
     app = AppBody()
