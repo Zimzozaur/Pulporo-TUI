@@ -2,7 +2,7 @@ from datetime import datetime
 
 from textual.app import ComposeResult
 from textual.containers import Horizontal
-from textual.widgets import Input, Checkbox, TextArea, Button, Static
+from textual.widgets import Checkbox, Button, Static
 
 
 from .custom_validators import (

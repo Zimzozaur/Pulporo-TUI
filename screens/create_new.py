@@ -1,16 +1,16 @@
 from textual import on
 from textual.app import ComposeResult
-from textual.containers import Container, Vertical, ScrollableContainer, Horizontal, VerticalScroll, Center
+from textual.containers import Container, VerticalScroll, Center
 from textual.events import Click
 from textual.screen import ModalScreen
 from textual.widgets import (
     Button,
     OptionList,
-    Label, Static, Input, Checkbox, TextArea
+    Label
 )
 from textual.widgets.option_list import Option, Separator
 
-from forms.one_offs import OutflowsForm
+from forms.form import OutflowsForm
 
 
 class CreateNewPopup(ModalScreen):
@@ -97,12 +97,17 @@ class CreateNewPopup(ModalScreen):
             self.query_one('#choose-form').remove()
 
     @on(Button.Pressed, '#form-cancel-button')
-    def remove_form_from_dom(self):
+    def remove_form_from_dom(self) -> None:
         """Remove form from dom on cancel button click"""
         self.query_one('#popup-form').remove()
         self.query_one('#show-forms').disabled = False
         self.toggle_form = False
         self.toggle_list_display()
+
+    @on(Button.Pressed, '#form-submit-button')
+    def remove_form_from_dom(self) -> None:
+        """Send request and remove form from DOM when accepted"""
+        """Collect """
 
     def on_option_list_option_selected(self, event: OptionList.OptionSelected) -> None:
         """Called when Option is clicked"""

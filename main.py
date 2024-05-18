@@ -1,4 +1,5 @@
 import os
+
 from textual.app import App, ComposeResult
 from textual.containers import Container
 from textual.widgets import (
@@ -7,7 +8,6 @@ from textual.widgets import (
     Header,
 )
 
-from screens.month_year_popup import MonthYearPopup
 from screens.create_new import CreateNewPopup
 
 from views.dashboard import Dashboard
