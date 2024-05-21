@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List, Literal
 
 from requests import get
 
@@ -15,7 +14,7 @@ from textual.widgets import (
 from screens.month_year_popup import MonthYearPopup
 
 
-MONTHS = [
+MONTHS: list[str] = [
     "Jan", "Feb", "Mar", "Apr", "May", "Jun",
     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 ]
@@ -43,7 +42,7 @@ class DateSection(Container):
 
     def __init__(self, date_dict, *children: Widget):
         super().__init__(*children)
-        self.date_dict = date_dict
+        self.date_dict: dict = date_dict
 
     def compose(self) -> ComposeResult:
         yield Button('Prev Month', id='prev-month')
@@ -63,11 +62,10 @@ class MonthButton(Button):
 
 
 class LedgerMenu(Container):
+    """Hold all menu button containers"""
     def __init__(self, date_dict):
         super().__init__()
-        self.date_dict = date_dict
-
-    """Hold all menu button containers"""
+        self.date_dict: dict = date_dict
 
     def compose(self) -> ComposeResult:
         yield FlowSection()
@@ -85,7 +83,7 @@ class LedgerTable(Container):
 
     def __init__(self, table_data):
         super().__init__()
-        self.table_data = table_data
+        self.table_data: list[dict] = table_data
 
     def compose(self) -> ComposeResult:
         yield Table()
@@ -93,7 +91,7 @@ class LedgerTable(Container):
     def on_mount(self):
         table = self.query_one(Table)
         table.zebra_stripes = True
-        table_data = self.table_data
+        table_data: list[dict] = self.table_data
         if table_data:
             table.add_columns(*table_data[0])
             table.add_rows(table_data[1:])
@@ -104,10 +102,10 @@ class LedgerTable(Container):
 
 class Ledger(Container):
     """Main view wrapper"""
-    ENDPOINT_URL = 'outflows'
+    ENDPOINT_URL: str = 'outflows'
     PULPORO_API_URL: str = "TEST"
     TODAY = datetime.now()
-    params = {
+    params: dict = {
         'year': TODAY.year,
         'month': TODAY.month,
     }
@@ -122,12 +120,12 @@ class Ledger(Container):
         if button.variant == 'primary' or button.id == 'month-button':
             return
 
-        flow_section = {'outflows', 'inflows'}
-        type_section = {'one-off', 'all', 'recurring'}
-        month_section = {'prev-month', 'next-month'}
+        flow_section: set = {'outflows', 'inflows'}
+        type_section: set = {'one-off', 'all', 'recurring'}
+        month_section: set = {'prev-month', 'next-month'}
 
         if button.id in flow_section:
-            self.ENDPOINT_URL = 'inflows' if button.id == 'inflows' else 'outflows'
+            self.ENDPOINT_URL: str = 'inflows' if button.id == 'inflows' else 'outflows'
             self.all_to_default_one_to_primary(flow_section, button)
 
         elif button.id in type_section:
@@ -135,7 +133,7 @@ class Ledger(Container):
 
         elif button.id in month_section:
             # Change month before request
-            month_operation = -1 if button.id == 'prev-month' else 1
+            month_operation: int = -1 if button.id == 'prev-month' else 1
             self.params['month'] += month_operation
             if self.params['month'] == 0:
                 self.params['year'] -= 1
@@ -181,7 +179,7 @@ class Ledger(Container):
 
     def request_table_data(self) -> list[tuple]:
         """Call Pulporo endpoint and return list of tuples"""
-        endpoint = self.PULPORO_API_URL + self.ENDPOINT_URL
+        endpoint: str = self.PULPORO_API_URL + self.ENDPOINT_URL
         response = get(endpoint, params=self.params)
         list_of_dicts: list[dict] = response.json()
 
@@ -189,6 +187,6 @@ class Ledger(Container):
         if not list_of_dicts:
             return []
 
-        table_data = [tuple(key.capitalize() for key in ['No', *list_of_dicts[0]])]
+        table_data: list[tuple] = [tuple(key.capitalize() for key in ['No', *list_of_dicts[0]])]
         table_data.extend((num, *d.values()) for num, d in enumerate(list_of_dicts, start=1))
         return table_data
