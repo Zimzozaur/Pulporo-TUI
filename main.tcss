@@ -73,7 +73,8 @@ LedgerMenu Button {
 
 
 Table {
-    height: auto;
+    height: 1fr;
+    width: 1fr;
 }
 
 /* --------------------------------------------------- */
