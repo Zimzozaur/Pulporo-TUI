@@ -85,7 +85,10 @@ class AppBody(App):
         ('ctrl+d', 'toggle_dark', 'Dark Mode'),
         ('ctrl+n', 'create_new', 'Create New'),
     ]
-    config = {}
+
+    def __init__(self):
+        super().__init__()
+        self.config = load_globals()
 
     def compose(self) -> ComposeResult:
         # create the ledger widget with the URL in the config
@@ -112,6 +115,5 @@ def load_globals():
 
 if __name__ == '__main__':
     app = AppBody()
-    app.config = load_globals()
     app.run()
 

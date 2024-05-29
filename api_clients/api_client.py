@@ -1,13 +1,16 @@
+import os
+
 from typing import Literal
 
-from requests import get, Response
-
-from tests.data import test_static_data
+from requests import (
+    get, post,
+    Response
+)
 
 
 class BasePulporoClient:
-    def __init__(self, url):
-        self.url = url
+    def __init__(self):
+        self.url = os.getenv("PULPORO_API_URL", "http://localhost:8000/")
         self.headers = {}
 
 
@@ -19,7 +22,8 @@ class OneOffClient(BasePulporoClient):
         list_of_dicts: list[dict] = response.json()
         return list_of_dicts
 
-    def post_flow(self, endpoint: Literal['outflows', 'inflows'], param_dict):
-        pass
-
+    def post_flow(self, endpoint: Literal['outflows', 'inflows'], json) -> Response:
+        endpoint_url: str = self.url + endpoint
+        response: Response = post(endpoint_url, json=json)
+        return response
 
