@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from typing import cast
+
 from requests import get
 
 from textual.widget import Widget
@@ -11,6 +13,7 @@ from textual.widgets import (
     DataTable,
 )
 
+from main import AppBody
 from screens.month_year_popup import MonthYearPopup
 
 
@@ -103,7 +106,6 @@ class LedgerTable(Container):
 class Ledger(Container):
     """Main view wrapper"""
     ENDPOINT_URL: str = 'outflows'
-    PULPORO_API_URL: str = "TEST"
     TODAY = datetime.now()
     params: dict = {
         'year': TODAY.year,
@@ -179,7 +181,8 @@ class Ledger(Container):
 
     def request_table_data(self) -> list[tuple]:
         """Call Pulporo endpoint and return list of tuples"""
-        endpoint: str = self.PULPORO_API_URL + self.ENDPOINT_URL
+        self.app_body = cast(AppBody, self.app)
+        endpoint: str = self.app_body.config['PULPORO_API_URL'] + self.ENDPOINT_URL
         response = get(endpoint, params=self.params)
         list_of_dicts: list[dict] = response.json()
 
@@ -190,3 +193,4 @@ class Ledger(Container):
         table_data: list[tuple] = [tuple(key.capitalize() for key in ['No', *list_of_dicts[0]])]
         table_data.extend((num, *d.values()) for num, d in enumerate(list_of_dicts, start=1))
         return table_data
+

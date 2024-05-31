@@ -1,5 +1,7 @@
 import os
 
+from typing import Dict
+
 from textual.app import App, ComposeResult
 from textual.containers import Container
 from textual.widgets import (
@@ -76,7 +78,21 @@ class MainApp(Container):
     pass
 
 
-class AppBody(App):
+def load_globals() -> Dict[str, str]:
+    return {
+        "PULPORO_API_URL": os.getenv("PULPORO_API_URL", "http://localhost:8000/")
+    }
+
+
+class AppConfig(App):
+    """Subclass of App with config attribute"""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.config = load_globals()
+
+
+class AppBody(AppConfig):
     """Container for the whole app"""
 
     TITLE = 'Pulporo 🐙'
@@ -85,10 +101,6 @@ class AppBody(App):
         ('ctrl+d', 'toggle_dark', 'Dark Mode'),
         ('ctrl+n', 'create_new', 'Create New'),
     ]
-
-    def __init__(self):
-        super().__init__()
-        self.config = load_globals()
 
     def compose(self) -> ComposeResult:
         # create the ledger widget with the URL in the config
@@ -104,13 +116,6 @@ class AppBody(App):
 
     def action_create_new(self):
         self.push_screen(CreateNewPopup('CreateNewPopup'))
-
-
-def load_globals():
-    return dict(
-        # here is the static by default value
-        PULPORO_API_URL=os.getenv("PULPORO_API_URL", "http://localhost:8000/")
-    )
 
 
 if __name__ == '__main__':

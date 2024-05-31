@@ -15,10 +15,10 @@ class TitleMax50Validator(Validator):
 
 class DateValidator(Validator):
     def validate(self, value: str) -> ValidationResult:
-        if not re.match(r'^\d{1,2}-\d{1,2}-\d{4}$', value):
-            return self.failure("Input must be a date in the format day-month-year (e.g., 1-1-2024)")
+        if not re.match(r'^\d{4}-\d{2}-\d{2}$', value):
+            return self.failure("Input must be a date in the format year-month-day (e.g., 2024-05-31)")
         try:
-            datetime.strptime(value, '%d-%m-%Y')
+            datetime.strptime(value, '%Y-%m-%d')
         except ValueError:
             return self.failure("Invalid date")
         return self.success()

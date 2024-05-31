@@ -22,7 +22,7 @@ class OneOffClient(BasePulporoClient):
         list_of_dicts: list[dict] = response.json()
         return list_of_dicts
 
-    def post_flow(self, endpoint: Literal['outflows', 'inflows'], json) -> Response:
+    def post_flow(self, endpoint: Literal['outflows/', 'inflows/'], json: dict) -> Response:
         endpoint_url: str = self.url + endpoint
         response: Response = post(endpoint_url, json=json)
         return response

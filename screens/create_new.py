@@ -11,6 +11,7 @@ from textual.widgets import (
 from textual.widgets.option_list import Option, Separator
 
 from forms.form import OutflowsForm
+from api_clients.api_client import OneOffClient
 
 
 class CreateNewPopup(ModalScreen):
@@ -56,6 +57,7 @@ class CreateNewPopup(ModalScreen):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.api = OneOffClient()
         self.toggle_list = False
         self.toggle_form = False
         self.options = [
@@ -107,7 +109,9 @@ class CreateNewPopup(ModalScreen):
     @on(Button.Pressed, '#form-submit-button')
     def remove_form_from_dom(self) -> None:
         """Send request and remove form from DOM when accepted"""
-        """Collect """
+        form = self.query_one(OutflowsForm)
+        form.is_form_valid()
+        self.api.post_flow('outflows/', form.form_to_dict())
 
     def on_option_list_option_selected(self, event: OptionList.OptionSelected) -> None:
         """Called when Option is clicked"""
@@ -125,6 +129,4 @@ class CreateNewPopup(ModalScreen):
                 self.query_one('#list-form-wrapper').mount(OutflowsForm(id='popup-form'))
             case 'inflow-one-off':
                 print('2')
-
-
 
