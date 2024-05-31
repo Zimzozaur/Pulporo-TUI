@@ -121,7 +121,7 @@ class InflowsForm(Static):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields: dict[str, NotBlinkingInput | Checkbox | NotBlinkingTextArea] = {
+        self.fields: dict[str, NotBlinkingInput | NotBlinkingTextArea] = {
             'title': NotBlinkingInput(
                 id='form-title', placeholder='Title',
                 validators=[TitleMax50Validator()],
