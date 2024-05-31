@@ -1,6 +1,8 @@
 from datetime import datetime
 
-from typing import cast
+from typing import TYPE_CHECKING, cast
+if TYPE_CHECKING:
+    from main import AppBody
 
 from requests import get
 
@@ -150,6 +152,10 @@ class Ledger(Container):
         'month': TODAY.month,
     }
 
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.app_body = cast("AppBody", self.app)
+
     def compose(self) -> ComposeResult:
         yield LedgerMenu(date_dict=self.params)
         yield LedgerTable(table_data=self.request_table_data())
@@ -219,8 +225,6 @@ class Ledger(Container):
 
     def request_table_data(self) -> list[tuple]:
         """Call Pulporo endpoint and return list of tuples"""
-        from main import AppBody
-        self.app_body = cast(AppBody, self.app)
         endpoint: str = self.app_body.config['PULPORO_API_URL'] + self.ENDPOINT_URL
         response = get(endpoint, params=self.params)
         list_of_dicts: list[dict] = response.json()
