@@ -13,7 +13,6 @@ from textual.widgets import (
     DataTable,
 )
 
-from main import AppBody
 from screens.month_year_popup import MonthYearPopup
 
 
@@ -181,6 +180,7 @@ class Ledger(Container):
 
     def request_table_data(self) -> list[tuple]:
         """Call Pulporo endpoint and return list of tuples"""
+        from main import AppBody
         self.app_body = cast(AppBody, self.app)
         endpoint: str = self.app_body.config['PULPORO_API_URL'] + self.ENDPOINT_URL
         response = get(endpoint, params=self.params)
