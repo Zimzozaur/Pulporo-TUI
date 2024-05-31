@@ -110,14 +110,12 @@ class CreateNewPopup(ModalScreen):
     @on(Button.Pressed, '#form-submit-button')
     def remove_form_from_dom(self) -> None:
         """Send request and remove form from DOM when accepted"""
-        form = self.query_one(OutflowsForm)
-        if not form.is_form_valid():
-            return None
-
         match self.current_form:
             case 'outflow-one-off':
+                form = self.query_one(OutflowsForm)
                 self.api.post_flow('outflows/', form.form_to_dict())
             case 'inflow-one-off':
+                form = self.query_one(InflowsForm)
                 self.api.post_flow('inflows/', form.form_to_dict())
 
         self.current_form = None
