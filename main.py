@@ -21,11 +21,6 @@ from views.reminders import Reminders
 from views.media import Media
 
 
-class Body(Container):
-    """Wraps main application"""
-    pass
-
-
 class LeftNavMenu(Container):
     """Menu used to switch between basic views"""
     clicked = 'LedgerBt'
@@ -51,31 +46,26 @@ class LeftNavMenu(Container):
 
         match button:
             case 'DashboardBt':
-                self.add_and_remove_from_dom(Dashboard)
+                self.add_and_remove_from_dom(Dashboard, 'dashboard')
             case 'LedgerBt':
-                self.add_and_remove_from_dom(Ledger)
+                self.add_and_remove_from_dom(Ledger, 'ledger')
             case 'RecurringBt':
-                self.add_and_remove_from_dom(Recurring)
+                self.add_and_remove_from_dom(Recurring, 'recurring')
             case 'InvestmentBt':
-                self.add_and_remove_from_dom(Investment)
+                self.add_and_remove_from_dom(Investment, 'investment')
             case 'LiabilitiesBt':
-                self.add_and_remove_from_dom(Liabilities)
+                self.add_and_remove_from_dom(Liabilities, 'liabilities')
             case 'RemindersBt':
-                self.add_and_remove_from_dom(Reminders)
+                self.add_and_remove_from_dom(Reminders, 'reminders')
             case 'MediaBt':
-                self.add_and_remove_from_dom(Media)
+                self.add_and_remove_from_dom(Media, 'media')
 
-    def add_and_remove_from_dom(self, cls):
+    def add_and_remove_from_dom(self, cls, element_id):
         """Remove Swaps view inside MainApp"""
-        main_app_wrapper = self.parent.parent.query('#MainApp').last()
+        main_app_wrapper = self.app.query_one('#main-app')
         for child in main_app_wrapper.children:
             child.remove()
-        main_app_wrapper.mount(cls())
-
-
-class MainApp(Container):
-    """Wrapper that holds views inside"""
-    pass
+        main_app_wrapper.mount(cls(id=element_id))
 
 
 def load_globals() -> Dict[str, str]:
@@ -84,43 +74,35 @@ def load_globals() -> Dict[str, str]:
     }
 
 
-class AppConfig(App):
-    """Subclass of App with config attribute"""
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.config = load_globals()
-
-
-class AppBody(AppConfig):
+class AppBody(App):
     """Container for the whole app"""
     DEFAULT_CSS = """
-    Body {
+    #body {
         margin: 1 2;
         height: 100%;
         width: 100%;
         background: $surface;
     }
     
-    LeftNavMenu {
+    #left-menu {
         width: 16;
         dock: left;
         background: $surface-lighten-1;
         padding: 0 1 1 1;
     }
     
-    LeftNavMenu Button {
+    #left-menu Button {
         margin-top: 1;
         content-align: center middle;
     }
     
-    LeftNavMenu Button:hover {
+    #left-menu Button:hover {
         background: $accent;
         color: $text;
         text-style: bold;
     }
     
-    MainApp {
+    #main-app {
         margin: 0 0 0 2;
         background: $surface-lighten-1;
         padding: 1;
@@ -132,17 +114,14 @@ class AppBody(AppConfig):
         ('ctrl+d', 'toggle_dark', 'Dark Mode'),
         ('ctrl+n', 'create_new', 'Create New'),
     ]
+    config = load_globals()
 
     def compose(self) -> ComposeResult:
-        # create the ledger widget with the URL in the config
-        ledger = Ledger(id='ledger')
-        ledger.PULPORO_API_URL = self.config["PULPORO_API_URL"]
-        with Container():
-            yield Header(show_clock=False)
-            with Body():
-                yield LeftNavMenu()
-                with MainApp(id='MainApp'):
-                    yield ledger
+        yield Header(show_clock=False)
+        with Container(id='body'):
+            yield LeftNavMenu(id='left-menu')
+            with Container(id='main-app'):
+                yield Ledger(id='ledger')
         yield Footer()
 
     def action_create_new(self):

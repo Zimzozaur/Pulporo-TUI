@@ -9,7 +9,7 @@ from requests import get
 from textual.widget import Widget
 from textual import on
 from textual.app import ComposeResult
-from textual.containers import Container
+from textual.containers import Container, Horizontal
 from textual.widgets import (
     Button,
     DataTable,
@@ -24,23 +24,6 @@ MONTHS: list[str] = [
 ]
 
 
-class FlowSection(Container):
-    """Hold Button to switch between Outflows & Inflows"""
-
-    def compose(self) -> ComposeResult:
-        yield Button('Outflows', id='outflows', variant='primary')
-        yield Button('Inflows', id='inflows')
-
-
-class TypeSection(Container):
-    """Hold Buttons to switch between One-off, All & Recurring"""
-
-    def compose(self) -> ComposeResult:
-        yield Button('One-off', id='one-off', variant='primary')
-        yield Button('All', id='all')
-        yield Button('Recurring', id='recurring')
-
-
 class DateSection(Container):
     """Hold Buttons and widget to switch target date"""
 
@@ -50,19 +33,12 @@ class DateSection(Container):
 
     def compose(self) -> ComposeResult:
         yield Button('Prev Month', id='prev-month')
-        yield MonthButton(
+        yield Button(
             f"{MONTHS[self.date_dict['month'] - 1]} {self.date_dict['year']}",
             id='month-button'
         )
         yield Button('Today', id='today')
         yield Button('Next Month', id='next-month')
-
-
-class MonthButton(Button):
-    """
-    On click display month calendar.
-    Does not request on click
-    """
 
 
 class LedgerMenu(Container):
@@ -72,14 +48,16 @@ class LedgerMenu(Container):
         self.date_dict: dict = date_dict
 
     def compose(self) -> ComposeResult:
-        yield FlowSection()
-        yield TypeSection()
+        with Horizontal(id='flow-section'):
+            yield Button('Outflows', id='outflows', variant='primary')
+            yield Button('Inflows', id='inflows')
+
+        with Horizontal(id='type-section'):
+            yield Button('One-off', id='one-off', variant='primary')
+            yield Button(' All ', id='all')
+            yield Button('Recurring', id='recurring')
+
         yield DateSection(date_dict=self.date_dict)
-
-
-class Table(DataTable):
-    """Table that renders data from server"""
-    pass
 
 
 class LedgerTable(Container):
@@ -90,10 +68,10 @@ class LedgerTable(Container):
         self.table_data: list[dict] = table_data
 
     def compose(self) -> ComposeResult:
-        yield Table()
+        yield DataTable(id='data-table')
 
     def on_mount(self):
-        table = self.query_one(Table)
+        table: DataTable = self.query_one(DataTable)
         table.zebra_stripes = True
         table_data: list[dict] = self.table_data
         if table_data:
