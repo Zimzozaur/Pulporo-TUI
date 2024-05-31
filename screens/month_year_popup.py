@@ -7,6 +7,44 @@ from textual.widgets import Button
 
 
 class MonthYearPopup(ModalScreen):
+    DEFAULT_CSS = """
+    MonthYearPopup {
+        width: auto;
+        height: auto;
+        align: right top;
+    }
+    
+    #month-popup-body {
+        width: 28;
+        height: 14;
+        offset-x: -6;
+        offset-y: 2;
+        content-align: center middle;
+        padding: 1 2;
+    }
+    
+    .year-bt {
+        min-width: 8;
+    }
+    
+    .year-bt:hover {
+        background: $accent;
+        color: $text;
+        text-style: bold;
+    }
+    
+    
+    .month-bt {
+        min-width: 6;
+    }
+    
+    .month-bt:hover {
+        background: $accent;
+        color: $text;
+        text-style: bold;
+    }
+    """
+
     MONTHS_DICT = {
         'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4, 'may': 5, 'jun': 6,
         'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12

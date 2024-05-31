@@ -47,6 +47,7 @@ class CreateNewPopup(ModalScreen):
     
     #list-form-wrapper > OutflowsForm > * {
         margin-bottom: 1;
+        background: $surface-lighten-1;
     }
     """
 

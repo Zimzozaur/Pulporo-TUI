@@ -104,6 +104,45 @@ class LedgerTable(Container):
 
 class Ledger(Container):
     """Main view wrapper"""
+    DEFAULT_CSS = """
+    FlowSection {
+        layout: horizontal;
+        width: 21%;
+        align: left middle;
+    }
+    
+    TypeSection {
+        layout: horizontal;
+        width: 26%;
+        align: left middle;
+    }
+    
+    DateSection {
+        layout: horizontal;
+        width: 53%;
+        align: right middle;
+    }
+    
+    MonthButton {
+        color: $secondary;
+    }
+    
+    LedgerMenu {
+        layout: horizontal;
+        height: 4;
+    }
+    
+    LedgerMenu Button {
+        min-width: 1;
+    }
+    
+    
+    Table {
+        height: 1fr;
+        width: 1fr;
+    }
+    """
+
     ENDPOINT_URL: str = 'outflows'
     TODAY = datetime.now()
     params: dict = {

@@ -94,9 +94,40 @@ class AppConfig(App):
 
 class AppBody(AppConfig):
     """Container for the whole app"""
+    DEFAULT_CSS = """
+    Body {
+        margin: 1 2;
+        height: 100%;
+        width: 100%;
+        background: $surface;
+    }
+    
+    LeftNavMenu {
+        width: 16;
+        dock: left;
+        background: $surface-lighten-1;
+        padding: 0 1 1 1;
+    }
+    
+    LeftNavMenu Button {
+        margin-top: 1;
+        content-align: center middle;
+    }
+    
+    LeftNavMenu Button:hover {
+        background: $accent;
+        color: $text;
+        text-style: bold;
+    }
+    
+    MainApp {
+        margin: 0 0 0 2;
+        background: $surface-lighten-1;
+        padding: 1;
+    }
+    """
 
     TITLE = 'Pulporo 🐙'
-    CSS_PATH = 'main.tcss'
     BINDINGS = [
         ('ctrl+d', 'toggle_dark', 'Dark Mode'),
         ('ctrl+n', 'create_new', 'Create New'),
