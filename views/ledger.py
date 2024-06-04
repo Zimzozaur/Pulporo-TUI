@@ -14,8 +14,11 @@ from textual.widgets import (
     Button,
     DataTable,
 )
+from textual.widgets._data_table import RowKey
 
 from screens.month_year_popup import MonthYearPopup
+from screens.io_detail import IODetail
+from utils.date_time import format_date_string
 
 
 MONTHS: list[str] = [
@@ -74,12 +77,12 @@ class LedgerTable(Container):
         table: DataTable = self.query_one(DataTable)
         table.zebra_stripes = True
         table_data: list[dict] = self.table_data
-        if table_data:
+        if table_data == [[]]:
+            table.add_column('Create new records to fill the table 🤭')
+        else:
             table.add_columns(*table_data[0])
             table.add_rows(table_data[1:])
             table.cursor_type = "row"
-        else:
-            table.add_column('Create new records to fill the table 🤭')
 
 
 class Ledger(Container):
@@ -201,7 +204,7 @@ class Ledger(Container):
             swap_table_to_new_update_month_button
         )
 
-    def request_table_data(self) -> list[tuple]:
+    def request_table_data(self) -> list[list]:
         """Call Pulporo endpoint and return list of tuples"""
         endpoint: str = self.app_body.config['PULPORO_API_URL'] + self.ENDPOINT_URL
         response = get(endpoint, params=self.params)
@@ -209,9 +212,31 @@ class Ledger(Container):
 
         # Escape if there is no data
         if not list_of_dicts:
-            return []
+            return [[]]
 
-        table_data: list[tuple] = [tuple(key.capitalize() for key in ['No', *list_of_dicts[0]])]
-        table_data.extend((num, *d.values()) for num, d in enumerate(list_of_dicts, start=1))
+        column_labels: tuple = ('No', *list_of_dicts[0])
+        table_data: list[list] = [[key.capitalize() for key in column_labels]]
+
+        table: list[list] = [[num, *d.values()] for num, d in enumerate(list_of_dicts, start=1)]
+        for row in table:
+            row[-1] = format_date_string(row[-1])
+            row[-2] = format_date_string(row[-2])
+
+        table_data.extend(table)
         return table_data
+
+    @on(DataTable.RowSelected)
+    def open_popup_with_details(self, event: DataTable.RowSelected) -> None:
+        """Open popup with I/O details"""
+        key: RowKey = event.row_key
+        table: DataTable = self.query_one(DataTable)
+        row: list = table.get_row(key)
+        self.app.push_screen(IODetail(data=row))
+
+
+if __name__ == '__main__':
+    from main import AppBody
+    app = AppBody()
+    ledger = Ledger()
+    ledger.request_table_data()
 

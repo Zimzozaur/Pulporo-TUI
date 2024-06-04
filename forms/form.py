@@ -52,7 +52,7 @@ class OutflowsForm(Static):
                 validators=[DateValidator()],
             ),
             'prediction': Checkbox('Prediction', True, id='form-prediction'),
-            'notes': NotBlinkingTextArea(id='form-textarea', show_line_numbers=True),
+            'notes': NotBlinkingTextArea(id='form-textarea', show_line_numbers=False),
         }
         self.valid_fields: dict[str, bool] = {
             'form-title': False,
@@ -137,7 +137,7 @@ class InflowsForm(Static):
                 restrict=r'^\d{0,4}-?\d{0,2}-?\d{0,2}$',
                 validators=[DateValidator()],
             ),
-            'notes': NotBlinkingTextArea(id='form-textarea', show_line_numbers=True),
+            'notes': NotBlinkingTextArea(id='form-textarea', show_line_numbers=False),
         }
         self.valid_fields: dict[str, bool] = {
             'form-title': False,
