@@ -1,12 +1,6 @@
 from datetime import datetime
+from typing import Literal
 
-from typing import TYPE_CHECKING, cast
-if TYPE_CHECKING:
-    from main import AppBody
-
-from requests import get
-
-from textual.widget import Widget
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal
@@ -18,7 +12,10 @@ from textual.widgets._data_table import RowKey
 
 from screens.month_year_popup import MonthYearPopup
 from screens.io_detail import IODetail
+
 from utils.date_time import format_date_string
+
+from api_clients.api_client import OneOffClient
 
 
 class LedgerTable(Container):
@@ -84,7 +81,6 @@ class Ledger(Container):
     }
     """
 
-    ENDPOINT_URL: str = 'outflows'
     MONTHS: list[str] = [
         "Jan", "Feb", "Mar", "Apr", "May", "Jun",
         "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
@@ -94,10 +90,11 @@ class Ledger(Container):
         'year': TODAY.year,
         'month': TODAY.month,
     }
+    endpoint_url: str = 'outflows/'
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.app_body = cast("AppBody", self.app)
+        self.one_off_api = OneOffClient()
 
     def compose(self) -> ComposeResult:
         with Container(id='ledger-menu'):
@@ -148,7 +145,7 @@ class Ledger(Container):
         button: Button = event.button
         if button.variant == 'primary':
             return
-        self.ENDPOINT_URL: str = 'inflows' if button.id == 'inflows' else 'outflows'
+        self.endpoint_url: Literal['outflows/', 'inflows/'] = 'inflows/' if button.id == 'inflows' else 'outflows/'
         section = 'outflows', 'inflows'
         self.all_to_default_one_to_primary(section, button)
         self.remove_and_mount_new_table()
@@ -237,9 +234,10 @@ class Ledger(Container):
         Returns:
             list[list]: A list of lists representing the table data.
         """
-        endpoint: str = self.app_body.config['PULPORO_API_URL'] + self.ENDPOINT_URL
-        response = get(endpoint, params=self.date)
-        list_of_dicts: list[dict] = response.json()
+        list_of_dicts = self.one_off_api.get_flow(
+            endpoint=self.endpoint_url,
+            param_dict=self.date
+        )
 
         # Escape if there is no data
         if not list_of_dicts:

@@ -10,8 +10,8 @@ from textual.widgets import (
 )
 from textual.widgets.option_list import Option, Separator
 
-from forms.form import OutflowsForm, InflowsForm
 from api_clients.api_client import OneOffClient
+from forms.form import OutflowsForm, InflowsForm
 
 
 class CreateNewPopup(ModalScreen):
@@ -53,7 +53,7 @@ class CreateNewPopup(ModalScreen):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.api = OneOffClient()
+        self.one_off_api = OneOffClient()
         self.current_form = None
         self.options = [
             Option('Outflow One-off', id='outflow-one-off'),
@@ -88,10 +88,10 @@ class CreateNewPopup(ModalScreen):
         match self.current_form:
             case 'outflow-one-off':
                 form = self.query_one(OutflowsForm)
-                self.api.post_flow('outflows/', form.form_to_dict())
+                self.one_off_api.post_flow('outflows/', form.form_to_dict())
             case 'inflow-one-off':
                 form = self.query_one(InflowsForm)
-                self.api.post_flow('inflows/', form.form_to_dict())
+                self.one_off_api.post_flow('inflows/', form.form_to_dict())
 
         self.remove_form_from_dom()
 

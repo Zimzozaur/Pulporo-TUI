@@ -20,6 +20,8 @@ from views.liabilities import Liabilities
 from views.reminders import Reminders
 from views.media import Media
 
+from api_clients.api_client import OneOffClient
+
 
 class LeftNavMenu(Container):
     """Menu used to switch between basic views"""
@@ -68,12 +70,6 @@ class LeftNavMenu(Container):
         main_app_wrapper.mount(cls(id=element_id))
 
 
-def load_globals() -> Dict[str, str]:
-    return {
-        "PULPORO_API_URL": os.getenv("PULPORO_API_URL", "http://localhost:8000/")
-    }
-
-
 class AppBody(App):
     """Container for the whole app"""
     DEFAULT_CSS = """
@@ -114,7 +110,6 @@ class AppBody(App):
         ('ctrl+d', 'toggle_dark', 'Dark Mode'),
         ('ctrl+n', 'create_new', 'Create New'),
     ]
-    config = load_globals()
 
     def compose(self) -> ComposeResult:
         yield Header(show_clock=False)

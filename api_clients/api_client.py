@@ -16,7 +16,7 @@ class BasePulporoClient:
 
 class OneOffClient(BasePulporoClient):
     """Client for the OneOffs Operations """
-    def get_flow(self, endpoint: Literal['outflows', 'inflows'], param_dict):
+    def get_flow(self, endpoint: Literal['outflows/', 'inflows/'], param_dict):
         endpoint_url: str = self.url + endpoint
         response: Response = get(endpoint_url, params=param_dict, headers=self.headers)
         list_of_dicts: list[dict] = response.json()
