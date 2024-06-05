@@ -1,7 +1,3 @@
-import os
-
-from typing import Dict
-
 from textual.app import App, ComposeResult
 from textual.containers import Container
 from textual.widgets import (
@@ -19,8 +15,6 @@ from views.investment import Investment
 from views.liabilities import Liabilities
 from views.reminders import Reminders
 from views.media import Media
-
-from api_clients.api_client import OneOffClient
 
 
 class LeftNavMenu(Container):

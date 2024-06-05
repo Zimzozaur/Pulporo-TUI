@@ -1,11 +1,10 @@
 from collections import namedtuple
 
-from textual import on
 from textual.app import ComposeResult
 from textual.containers import Container
 from textual.events import Click
 from textual.screen import ModalScreen
-from textual.widgets import Pretty, Static
+from textual.widgets import Static
 
 from forms.form import OutflowsForm, InflowsForm
 from api_clients.api_client import OneOffClient
