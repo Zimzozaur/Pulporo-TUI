@@ -5,7 +5,6 @@ from textual.widgets import Static, Button
 from requests import get
 
 
-
 def json_to_list(json_file):
     result = ''
     for key, value in json_file.items():

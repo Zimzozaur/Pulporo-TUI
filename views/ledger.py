@@ -247,10 +247,6 @@ class Ledger(Container):
         table_data: list[list] = [[key.capitalize() for key in column_labels]]
 
         table: list[list] = [[num, *d.values()] for num, d in enumerate(list_of_dicts, start=1)]
-        for row in table:
-            row[-1] = format_date_string(row[-1])
-            row[-2] = format_date_string(row[-2])
-
         table_data.extend(table)
         return table_data
 
