@@ -13,8 +13,6 @@ from textual.widgets.data_table import RowKey
 from screens.month_year_popup import MonthYearPopup
 from screens.io_detail import IODetail
 
-from utils.date_time import format_date_string
-
 from api_clients.api_client import OneOffClient
 
 
