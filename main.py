@@ -118,9 +118,9 @@ class AppBody(App):
 
     def compose(self) -> ComposeResult:
         yield Header(show_clock=False)
-        with Container(id='body', classes='-hidden-margin'):
-            yield LeftNavMenu(id='left-menu', classes='-hidden')
-            with Container(id='main-app', classes='-hidden-margin'):
+        with Container(id='body'):
+            yield LeftNavMenu(id='left-menu')
+            with Container(id='main-app'):
                 yield Ledger(id='ledger')
         yield Footer()
 
