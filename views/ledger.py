@@ -29,13 +29,13 @@ class LedgerTable(Container):
     def on_mount(self) -> None:
         table: DataTable = self.query_one(DataTable)
         table.zebra_stripes = True
-        table_data: list[dict] = self.table_data
-        if table_data == [[]]:
+        table.cursor_type = "row"
+
+        if self.table_data == [[]]:
             table.add_column('Create new records to fill the table 🤭')
         else:
-            table.add_columns(*table_data[0])
-            table.add_rows(table_data[1:])
-            table.cursor_type = "row"
+            table.add_columns(*self.table_data[0])
+            table.add_rows(self.table_data[1:])
 
 
 class Ledger(Container):
@@ -72,10 +72,8 @@ class Ledger(Container):
         min-width: 1;
     }
     
-    
-    Table {
-        height: 1fr;
-        width: 1fr;
+    #data-table {
+        scrollbar-gutter: stable;
     }
     """
 
@@ -284,9 +282,4 @@ class Ledger(Container):
         self.get_widget_by_id('month-button').label = new_name
 
 
-if __name__ == '__main__':
-    from main import AppBody
-    app = AppBody()
-    ledger = Ledger()
-    ledger.request_table_data()
 

@@ -97,24 +97,54 @@ class AppBody(App):
         background: $surface-lighten-1;
         padding: 1;
     }
+    
+    .-hidden-margin {
+        margin: 0 !important;
+    }
+    
+    .-hidden {
+        display: none;
+    }
+    
     """
 
     TITLE = 'Pulporo 🐙'
     BINDINGS = [
         ('ctrl+d', 'toggle_dark', 'Dark Mode'),
         ('ctrl+n', 'create_new', 'Create New'),
+        ('ctrl+o', 'toggle_left_panel', 'Hide Left Menu')
     ]
+    left_menu = True
 
     def compose(self) -> ComposeResult:
         yield Header(show_clock=False)
-        with Container(id='body'):
-            yield LeftNavMenu(id='left-menu')
-            with Container(id='main-app'):
+        with Container(id='body', classes='-hidden-margin'):
+            yield LeftNavMenu(id='left-menu', classes='-hidden')
+            with Container(id='main-app', classes='-hidden-margin'):
                 yield Ledger(id='ledger')
         yield Footer()
 
-    def action_create_new(self):
+    def action_create_new(self) -> None:
+        """
+        Display a popup screen for creating new database entries.
+
+        This method triggers the display of the 'CreateNewPopup' screen,
+        which allows users to input details for new entries to be added
+        to the database.
+        """
         self.push_screen(CreateNewPopup('CreateNewPopup'))
+
+    def action_toggle_left_panel(self) -> None:
+        """
+        Toggle the visibility of the left panel and adjust margins for full-screen mode.
+
+        This method toggles the left panel by toggling the '-hidden' class
+        on the element with the 'LeftNavMenu'. It also adjusts the margins of
+        elements with IDs 'body' and 'main-app' by toggling the '-hidden-margin'
+        """
+        self.query_one('#body').toggle_class('-hidden-margin')
+        self.query_one('#left-menu').toggle_class('-hidden')
+        self.query_one('#main-app').toggle_class('-hidden-margin')
 
 
 if __name__ == '__main__':
