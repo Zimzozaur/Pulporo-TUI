@@ -2,18 +2,22 @@ from datetime import datetime
 
 from textual import on
 from textual.app import ComposeResult
-from textual.containers import Horizontal
+from textual.containers import Horizontal, Center, Container
 from textual.widgets import Checkbox, Button, Static
 
 from .custom_validators import (
     TitleMax50Validator,
-    DateValidator
+    DateValidator,
+    ValueValidator
 )
 from fields.fields import NotBlinkingInput, NotBlinkingTextArea
+from utils.date_time import format_date_string
+
+# TODO: Create One IO Form that will be a parent class
 
 
 class OutflowsForm(Static):
-    DEFAULT_CSS = """
+    DEFAULT_CSS = """  
     #form-textarea {
         height: 6;
     }
@@ -33,7 +37,17 @@ class OutflowsForm(Static):
     }    
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+            self, *args,
+            title: str = None,
+            value: float = None,
+            date: str = None,
+            prediction: bool = True,
+            notes: str = None,
+            creation_date: str = None,
+            last_modification: str = None,
+            **kwargs
+    ):
         super().__init__(*args, **kwargs)
         self.fields: dict[str, NotBlinkingInput | Checkbox | NotBlinkingTextArea] = {
             'title': NotBlinkingInput(
@@ -44,6 +58,7 @@ class OutflowsForm(Static):
                 id='form-value', placeholder='Value',
                 type='number',
                 restrict=r'^(0|[1-9]\d{0,14})(\.\d{0,2})?$',
+                validators=[ValueValidator()]
             ),
             'date': NotBlinkingInput(
                 id='form-date', placeholder='Date YYYY-MM-DD',
@@ -59,6 +74,16 @@ class OutflowsForm(Static):
             'form-value': False,
             'form-date': False,
         }
+        self.creation_date = creation_date
+        self.last_modification = last_modification
+
+        # True when GET by PK
+        if self.creation_date:
+            self.fields['title'].value = title
+            self.fields['value'].value = value
+            self.fields['date'].value = date
+            self.fields['prediction'].value = prediction
+            self.fields['notes'].text = notes
 
     def compose(self) -> ComposeResult:
         yield self.fields['title']
@@ -66,8 +91,12 @@ class OutflowsForm(Static):
         yield self.fields['date']
         yield self.fields['prediction']
         yield self.fields['notes']
+        if self.creation_date:
+            yield Static()
+            yield Static(f'Creation Date: {format_date_string(self.creation_date)}')
+            yield Static(f'Last Modification: {format_date_string(self.last_modification)}')
         with Horizontal(id='form-action-buttons'):
-            yield Button('Cancel', variant='error', id='form-cancel-button')
+            yield Button('Cancel', variant='warning', id='form-cancel-button')
             yield Static()
             yield Button('Submit', variant='success', id='form-submit-button', disabled=True)
 
@@ -119,25 +148,33 @@ class InflowsForm(Static):
     }    
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+            self, *args,
+            title: str = 'Title',
+            value: float = 'Value',
+            date: str = 'Date YYYY-MM-DD',
+            notes: str = '',
+            **kwargs
+    ):
         super().__init__(*args, **kwargs)
-        self.fields: dict[str, NotBlinkingInput | NotBlinkingTextArea] = {
+        self.fields: dict[str, NotBlinkingInput | Checkbox | NotBlinkingTextArea] = {
             'title': NotBlinkingInput(
-                id='form-title', placeholder='Title',
+                id='form-title', placeholder=title,
                 validators=[TitleMax50Validator()],
             ),
             'value': NotBlinkingInput(
-                id='form-value', placeholder='Value',
+                id='form-value', placeholder=str(value),
                 type='number',
                 restrict=r'^(0|[1-9]\d{0,14})(\.\d{0,2})?$',
+                validators=[ValueValidator()]
             ),
             'date': NotBlinkingInput(
-                id='form-date', placeholder='Date YYYY-MM-DD',
+                id='form-date', placeholder=date,
                 type='text', value=datetime.today().strftime('%Y-%m-%d'),
                 restrict=r'^\d{0,4}-?\d{0,2}-?\d{0,2}$',
                 validators=[DateValidator()],
             ),
-            'notes': NotBlinkingTextArea(id='form-textarea', show_line_numbers=False),
+            'notes': NotBlinkingTextArea(id='form-textarea', show_line_numbers=False, text=notes),
         }
         self.valid_fields: dict[str, bool] = {
             'form-title': False,
@@ -151,7 +188,7 @@ class InflowsForm(Static):
         yield self.fields['date']
         yield self.fields['notes']
         with Horizontal(id='form-action-buttons'):
-            yield Button('Cancel', variant='error', id='form-cancel-button')
+            yield Button('Cancel', variant='warning', id='form-cancel-button')
             yield Static()
             yield Button('Submit', variant='success', id='form-submit-button', disabled=True)
 

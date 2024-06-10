@@ -31,6 +31,7 @@ class LeftNavMenu(Container):
         yield Button("Media", id='MediaBt')
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
+        """Change view of the main-app container"""
         button = event.button.id
         if button == self.clicked:
             return

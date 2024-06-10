@@ -206,18 +206,26 @@ class Ledger(Container):
     @on(DataTable.RowSelected)
     def open_popup_with_details(self, event: DataTable.RowSelected) -> None:
         """
-        Open a popup with I/O details.
-
-        Handle the event when a row in the DataTable is selected. It retrieves
-        the details of the selected row and opens a popup displaying the I/O details.
-
-        Args:
-            event (DataTable.RowSelected): The row selection event.
+        Open a popup with detailed information about a selected row in the DataTable.
+        Provide a callback function to reload the table if a 'DELETE' or 'PATCH' action was performed.
         """
+
+        def reload_table(code: str):
+            """Reloads the DataTable if the given code is 'DELETE' or 'PATCH'."""
+            if code != 'DELETE' and code != 'PATCH':
+                return
+            self.remove_and_mount_new_table()
+
         key: RowKey = event.row_key
         table: DataTable = self.query_one(DataTable)
         row: list = table.get_row(key)
-        self.app.push_screen(IODetail(data=row))
+
+        flow_type: Literal['outflows/', 'inflows/'] = 'inflows/'
+        if self.query_one('#outflows', Button).variant == 'primary':
+            flow_type = 'outflows/'
+
+        flow_data: dict = self.one_off_api.get_flow(endpoint=flow_type, pk=row[1])
+        self.app.push_screen(IODetail(data=flow_data, flow_type=flow_type), reload_table)
 
     def request_table_data(self) -> list[list]:
         """

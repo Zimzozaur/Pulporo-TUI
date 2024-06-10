@@ -6,7 +6,7 @@ from textual.screen import ModalScreen
 from textual.widgets import (
     Button,
     OptionList,
-    Label
+    Label, Static
 )
 from textual.widgets.option_list import Option, Separator
 
@@ -44,11 +44,6 @@ class CreateNewPopup(ModalScreen):
         height: 32;
         padding-bottom: 2;
     }
-    
-    #list-form-wrapper > OutflowsForm > * {
-        margin-bottom: 1;
-        background: $surface-lighten-1;
-    }
     """
 
     def __init__(self, *args, **kwargs):
@@ -64,7 +59,7 @@ class CreateNewPopup(ModalScreen):
     def compose(self) -> ComposeResult:
         with Container(id='new-popup-body'):
             with Center():
-                yield Label("CREATE NEW", id='header-title')
+                yield Static("CREATE NEW", id='header-title')
             with Center():
                 with VerticalScroll(id='list-form-wrapper'):
                     yield OptionList(*self.options, id="choose-form")
