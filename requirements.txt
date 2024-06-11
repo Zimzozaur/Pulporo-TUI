@@ -1,4 +1,11 @@
-requests~=2.31.0
+# TUI
 textual~=0.58.1
 textual-dev~=1.5.1
 rich~=13.7.1
+
+# Utility
+requests~=2.31.0
+
+# App quality
+mypy~=1.10.0
+pytest~=8.2.2
