@@ -8,13 +8,12 @@ from requests import (
 )
 
 
-class BasePulporoClient:
+class BasePulporoAPI:
     def __init__(self):
-        self.url = os.getenv("PULPORO_API_URL", "http://localhost:8000/")
-        self.headers = {}
+        self._url = os.getenv("PULPORO_API_URL", "http://localhost:8000/")
 
 
-class OneOffClient(BasePulporoClient):
+class OneOffAPI(BasePulporoAPI):
     """Client for the OneOffs Operations."""
 
     def get_flow(
@@ -34,11 +33,11 @@ class OneOffClient(BasePulporoClient):
         Returns:
             list[dict] | dict: The response data from the endpoint, either a list of dicts or a single dict.
         """
-        endpoint_url: str = self.url + endpoint
+        endpoint_url: str = self._url + endpoint
         if pk:
             endpoint_url += f'{pk}/'
 
-        response: Response = get(endpoint_url, params=param_dict, headers=self.headers)
+        response: Response = get(endpoint_url, params=param_dict)
         list_of_dicts: list[dict] | dict = response.json()
         return list_of_dicts
 
@@ -53,7 +52,7 @@ class OneOffClient(BasePulporoClient):
         Returns:
             Response: The response from the endpoint.
         """
-        endpoint_url: str = self.url + endpoint
+        endpoint_url: str = self._url + endpoint
         response: Response = post(endpoint_url, json=json)
         return response
 
@@ -69,7 +68,7 @@ class OneOffClient(BasePulporoClient):
         Returns:
             Response: The response from the endpoint.
         """
-        endpoint_url: str = self.url + endpoint + pk
+        endpoint_url: str = self._url + endpoint + pk
         response: Response = patch(endpoint_url, json=json)
         return response
 
@@ -84,6 +83,6 @@ class OneOffClient(BasePulporoClient):
         Returns:
             Response: The response from the endpoint.
         """
-        endpoint: str = self.url + endpoint + pk
+        endpoint: str = self._url + endpoint + pk
         response: Response = delete(endpoint)
         return response

@@ -13,25 +13,25 @@ from .custom_validators import (
 from fields.fields import NotBlinkingInput, NotBlinkingTextArea
 from utils.date_time import format_date_string
 
+
 # TODO: Create One IO Form that will be a parent class
 
-
-class OutflowsForm(Static):
+class BaseFlowsFrom(Static):
     DEFAULT_CSS = """  
     #form-textarea {
         height: 6;
     }
-    
+
     #form-action-buttons {
         height: auto;
         width: 1fr;
         margin-top: 1;
     }
-    
+
     Static {
         width: 1fr;
     }
-    
+
     NotBlinkingInput, NotBlinkingTextArea, Checkbox {
         margin-bottom: 1;
     }    
@@ -83,7 +83,7 @@ class OutflowsForm(Static):
             self.fields['value'].value = value
             self.fields['date'].value = date
             self.fields['prediction'].value = prediction
-            self.fields['notes'].text = notes
+            self.fields['notes'].value = notes
 
     def compose(self) -> ComposeResult:
         yield self.fields['title']
@@ -122,98 +122,14 @@ class OutflowsForm(Static):
             'value': self.fields['value'].value,
             'date': self.fields['date'].value,
             'prediction': self.fields['prediction'].value,
-            'notes': self.fields['notes'].text,
+            'notes': self.fields['notes'].value,
         }
         return form_data
 
 
-class InflowsForm(Static):
-    DEFAULT_CSS = """
-    #form-textarea {
-        height: 6;
-    }
+class OutflowsForm(BaseFlowsFrom):
+    pass
 
-    #form-action-buttons {
-        height: auto;
-        width: 1fr;
-        margin-top: 1;
-    }
 
-    Static {
-        width: 1fr;
-    }
-    
-    NotBlinkingInput, NotBlinkingTextArea {
-        margin-bottom: 1;
-    }    
-    """
-
-    def __init__(
-            self, *args,
-            title: str = 'Title',
-            value: float = 'Value',
-            date: str = 'Date YYYY-MM-DD',
-            notes: str = '',
-            **kwargs
-    ):
-        super().__init__(*args, **kwargs)
-        self.fields: dict[str, NotBlinkingInput | Checkbox | NotBlinkingTextArea] = {
-            'title': NotBlinkingInput(
-                id='form-title', placeholder=title,
-                validators=[TitleMax50Validator()],
-            ),
-            'value': NotBlinkingInput(
-                id='form-value', placeholder=str(value),
-                type='number',
-                restrict=r'^(0|[1-9]\d{0,14})(\.\d{0,2})?$',
-                validators=[ValueValidator()]
-            ),
-            'date': NotBlinkingInput(
-                id='form-date', placeholder=date,
-                type='text', value=datetime.today().strftime('%Y-%m-%d'),
-                restrict=r'^\d{0,4}-?\d{0,2}-?\d{0,2}$',
-                validators=[DateValidator()],
-            ),
-            'notes': NotBlinkingTextArea(id='form-textarea', show_line_numbers=False, text=notes),
-        }
-        self.valid_fields: dict[str, bool] = {
-            'form-title': False,
-            'form-value': False,
-            'form-date': False,
-        }
-
-    def compose(self) -> ComposeResult:
-        yield self.fields['title']
-        yield self.fields['value']
-        yield self.fields['date']
-        yield self.fields['notes']
-        with Horizontal(id='form-action-buttons'):
-            yield Button('Cancel', variant='warning', id='form-cancel-button')
-            yield Static()
-            yield Button('Submit', variant='success', id='form-submit-button', disabled=True)
-
-    @on(NotBlinkingInput.Changed)
-    def update_validation(self, event: NotBlinkingInput.Changed) -> None:
-        if event.validation_result.is_valid:
-            self.valid_fields[event.input.id] = True
-        else:
-            self.valid_fields[event.input.id] = False
-
-        self.query_one('#form-submit-button').disabled = not self.is_form_valid()
-
-    def is_form_valid(self):
-        """Return is form valid """
-        if all(self.valid_fields.values()):
-            return True
-        return False
-
-    def form_to_dict(self) -> dict:
-        """Return dict representation of a form"""
-        form_data = {
-            'title': self.fields['title'].value,
-            'value': self.fields['value'].value,
-            'date': self.fields['date'].value,
-            'notes': self.fields['notes'].text,
-        }
-        return form_data
-
+class InflowsForm(BaseFlowsFrom):
+    pass

@@ -13,7 +13,7 @@ from textual.widgets.data_table import RowKey
 from screens.month_year_popup import MonthYearPopup
 from screens.io_detail import IODetail
 
-from api_clients.api_client import OneOffClient
+from api_clients.api_client import OneOffAPI
 
 
 class LedgerTable(Container):
@@ -90,7 +90,7 @@ class Ledger(Container):
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.one_off_api = OneOffClient()
+        self.one_off_api = OneOffAPI()
 
     def compose(self) -> ComposeResult:
         with Container(id='ledger-menu'):

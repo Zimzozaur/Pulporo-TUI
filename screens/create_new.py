@@ -10,8 +10,10 @@ from textual.widgets import (
 )
 from textual.widgets.option_list import Option, Separator
 
-from api_clients.api_client import OneOffClient
+from api_clients.api_client import OneOffAPI
+from fields.fields import NotBlinkingInput
 from forms.form import OutflowsForm, InflowsForm
+from .confirmation_popup import ConfirmPopup
 
 
 class CreateNewPopup(ModalScreen):
@@ -48,8 +50,9 @@ class CreateNewPopup(ModalScreen):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.one_off_api = OneOffClient()
-        self.current_form = None
+        self.one_off_api = OneOffAPI()
+        self.form = None
+        self.form_default_data = None
         self.options = [
             Option('Outflow One-off', id='outflow-one-off'),
             Separator(),
@@ -66,13 +69,21 @@ class CreateNewPopup(ModalScreen):
 
     def on_click(self, event: Click):
         """Close popup when clicked on the background"""
-        if self.get_widget_at(event.screen_x, event.screen_y)[0] is self:
-            self.dismiss(False)
+        def dismiss_on_true(dismiss: bool):
+            if dismiss:
+                self.dismiss()
+
+        clicked_outside_body = self.get_widget_at(event.screen_x, event.screen_y)[0] is self
+        if clicked_outside_body and self.update_validation():
+            self.dismiss()
+        else:
+            message = 'Are you sure?'
+            self.app.push_screen(ConfirmPopup(message=message), dismiss_on_true)
 
     @on(Button.Pressed, '#form-cancel-button')
     def remove_form_from_dom(self) -> None:
         """Remove form from dom on cancel button click"""
-        self.current_form = None
+        self.form = None
         self.query_one('#popup-form').remove()
         option_list = OptionList(*self.options, id="choose-form")
         self.query_one('#list-form-wrapper').mount(option_list)
@@ -80,7 +91,7 @@ class CreateNewPopup(ModalScreen):
     @on(Button.Pressed, '#form-submit-button')
     def send_request(self) -> None:
         """Send request and remove form from DOM when accepted"""
-        match self.current_form:
+        match self.form:
             case 'outflow-one-off':
                 form = self.query_one(OutflowsForm)
                 self.one_off_api.post_flow('outflows/', form.form_to_dict())
@@ -101,6 +112,11 @@ class CreateNewPopup(ModalScreen):
             case 'inflow-one-off':
                 self.query_one('#list-form-wrapper').mount(InflowsForm(id='popup-form'))
 
-        self.current_form = selected_option
+        self.form = selected_option
+        self.form_default_data = self.form.form_to_dict()
 
+    @on(NotBlinkingInput.Changed)
+    def update_validation(self) -> bool:
+        if self.form_default_data == self.form.form_to_dict():
+            return True
 

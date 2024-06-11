@@ -10,7 +10,7 @@ from textual.widgets import Static, Button
 
 from fields.fields import NotBlinkingInput
 from forms.form import OutflowsForm, InflowsForm
-from api_clients.api_client import OneOffClient
+from api_clients.api_client import OneOffAPI
 from screens.confirmation_popup import ConfirmPopup
 
 
@@ -57,7 +57,7 @@ class IODetail(ModalScreen):
 
     def __init__(self, *args, data: dict, flow_type: Literal['outflows/', 'inflows/'], **kwargs):
         super().__init__(*args, **kwargs)
-        self.api = OneOffClient()
+        self.api = OneOffAPI()
         self.flow_type: Literal['outflows/', 'inflows/'] = flow_type
         self.pk = data.pop('id')
         self.data = data
