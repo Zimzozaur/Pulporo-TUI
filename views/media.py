@@ -5,8 +5,8 @@ from textual.widgets import Static, Button
 from requests import get
 
 
-def json_to_list(json_file):
-    result = ''
+def json_to_list(json_file: dict[str, str]) -> str:
+    result: str = ''
     for key, value in json_file.items():
         result += f"""{key}: [@click=open_link('{value}')]Photo[/]\n"""
     return result

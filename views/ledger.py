@@ -21,7 +21,7 @@ class LedgerTable(Container):
 
     def __init__(self, table_data):
         super().__init__()
-        self.table_data: list[dict] = table_data
+        self.table_data: list[list] = table_data
 
     def compose(self) -> ComposeResult:
         yield DataTable(id='data-table')

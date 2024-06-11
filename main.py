@@ -1,3 +1,5 @@
+from typing import Type
+
 from textual.app import App, ComposeResult
 from textual.containers import Container
 from textual.widgets import (
@@ -32,12 +34,12 @@ class LeftNavMenu(Container):
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Change view of the main-app container"""
-        button = event.button.id
+        button: str = event.button.id
         if button == self.clicked:
             return
 
-        self.get_child_by_id(button).variant = 'primary'
-        self.get_child_by_id(self.clicked).variant = 'default'
+        self.get_child_by_id(button, Button).variant = 'primary'
+        self.get_child_by_id(self.clicked, Button).variant = 'default'
 
         self.clicked = button
 
@@ -57,7 +59,11 @@ class LeftNavMenu(Container):
             case 'MediaBt':
                 self.add_and_remove_from_dom(Media, 'media')
 
-    def add_and_remove_from_dom(self, cls, element_id):
+    def add_and_remove_from_dom(
+        self,
+        cls: Type[Container],
+        element_id: str
+    ) -> None:
         """Remove Swaps view inside MainApp"""
         main_app_wrapper = self.app.query_one('#main-app')
         for child in main_app_wrapper.children:

@@ -45,7 +45,7 @@ class MonthYearPopup(ModalScreen):
     }
     """
 
-    MONTHS_DICT = {
+    MONTHS_DICT: dict[str, int] = {
         'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4, 'may': 5, 'jun': 6,
         'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12
     }
@@ -57,7 +57,7 @@ class MonthYearPopup(ModalScreen):
 
     def __init__(self, date_dict) -> None:
         super().__init__()
-        self.date_dict: dict = date_dict
+        self.date_dict: dict[str, int] = date_dict
         self.popup_year: int = self.date_dict['year']
 
     def compose(self) -> ComposeResult:
@@ -82,52 +82,52 @@ class MonthYearPopup(ModalScreen):
                 yield Button('Nov', id='nov', classes='month-bt')
                 yield Button('Dec', id='dec', classes='month-bt')
 
-    def on_mount(self):
+    def on_mount(self) -> None:
         """Color button on mount"""
         self.color_button_if_this_year()
 
     @on(Button.Pressed, '.month-bt')
-    def month_button(self, event: Button.Pressed):
+    def month_button(self, event: Button.Pressed) -> None:
         """Change query parameters of Ledger"""
-        self.date_dict['month']: int = self.MONTHS_DICT[event.button.id]
-        self.date_dict['year']: int = self.popup_year
+        self.date_dict['month'] = self.MONTHS_DICT[event.button.id]
+        self.date_dict['year'] = self.popup_year
         self.dismiss(True)
 
     @on(Button.Pressed, '#prev-year')
-    def change_year_back(self):
+    def change_year_back(self) -> None:
         """Change Display year to one before"""
         self.popup_year -= 1
-        self.query_one('#popup-year').label = str(self.popup_year)
+        self.query_one('#popup-year', Button).label = str(self.popup_year)
         self.color_button_if_this_year()
 
     @on(Button.Pressed, '#next-year')
-    def change_year_next(self):
+    def change_year_next(self) -> None:
         """Change Display year to next one"""
         self.popup_year += 1
-        self.query_one('#popup-year').label = str(self.popup_year)
+        self.query_one('#popup-year', Button).label = str(self.popup_year)
         self.color_button_if_this_year()
 
     @on(Button.Pressed, '#popup-year')
-    def this_year(self, event: Button.Pressed):
+    def this_year(self, event: Button.Pressed) -> None:
         self.popup_year = self.date_dict['year']
         event.button.label = str(self.popup_year)
         self.color_button_if_this_year()
 
-    def on_click(self, event: Click):
+    def on_click(self, event: Click) -> None:
         """Remove widget from DOM when clicked on background"""
         if self.get_widget_at(event.screen_x, event.screen_y)[0] is self:
             self.dismiss(False)
 
-    def color_button_if_this_year(self):
+    def color_button_if_this_year(self) -> None:
         """
         Change year and month buttons to primary
         when popup set to this year
         and to default on other year
         """
-        def change_color(color):
+        def change_color(color: str) -> None:
             month_abbreviations = self.MONTHS[self.date_dict['month'] - 1].lower()
-            self.query_one(f"#{month_abbreviations}").variant = color
-            self.query_one('#popup-year').variant = color
+            self.query_one(f"#{month_abbreviations}", Button).variant = color
+            self.query_one('#popup-year', Button).variant = color
 
         if self.popup_year == self.date_dict['year']:
             change_color('primary')

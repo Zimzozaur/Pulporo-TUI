@@ -1,15 +1,17 @@
 import os
 
-from typing import Literal
+from typing import Literal, Optional
 
 from requests import (
     get, post, patch, delete,
     Response
 )
 
+JsonDict = dict[str, str | float | int | bool | None]
+
 
 class BasePulporoAPI:
-    def __init__(self):
+    def __init__(self) -> None:
         self._url = os.getenv("PULPORO_API_URL", "http://localhost:8000/")
 
 
@@ -19,9 +21,9 @@ class OneOffAPI(BasePulporoAPI):
     def get_flow(
         self,
         endpoint: Literal['outflows/', 'inflows/'],
-        param_dict: dict = None,
-        pk: int = None
-    ) -> list[dict] | dict:
+        param_dict: dict[str, str] | None = None,
+        pk: int | None = None
+    ) -> list[JsonDict] | JsonDict:
         """
         Retrieve data from the specified endpoint.
 
@@ -38,10 +40,14 @@ class OneOffAPI(BasePulporoAPI):
             endpoint_url += f'{pk}/'
 
         response: Response = get(endpoint_url, params=param_dict)
-        list_of_dicts: list[dict] | dict = response.json()
+        list_of_dicts: list[JsonDict] | JsonDict = response.json()
         return list_of_dicts
 
-    def post_flow(self, endpoint: Literal['outflows/', 'inflows/'], json: dict) -> Response:
+    def post_flow(
+        self,
+        endpoint: Literal['outflows/', 'inflows/'],
+        json: JsonDict
+    ) -> Response:
         """
         Send a POST request to the specified endpoint.
 
@@ -56,7 +62,12 @@ class OneOffAPI(BasePulporoAPI):
         response: Response = post(endpoint_url, json=json)
         return response
 
-    def patch_flow(self, endpoint: Literal['outflows/', 'inflows/'], json: dict, pk: str) -> Response:
+    def patch_flow(
+        self,
+        endpoint: Literal['outflows/', 'inflows/'],
+        json: JsonDict,
+        pk: str
+    ) -> Response:
         """
         Send a PATCH request to the specified endpoint.
 
@@ -72,7 +83,11 @@ class OneOffAPI(BasePulporoAPI):
         response: Response = patch(endpoint_url, json=json)
         return response
 
-    def delete_flow(self, endpoint: Literal['outflows/', 'inflows/'], pk: str) -> Response:
+    def delete_flow(
+        self,
+        endpoint: Literal['outflows/', 'inflows/'],
+        pk: str
+    ) -> Response:
         """
         Send a DELETE request to the specified endpoint.
 
@@ -83,6 +98,6 @@ class OneOffAPI(BasePulporoAPI):
         Returns:
             Response: The response from the endpoint.
         """
-        endpoint: str = self._url + endpoint + pk
-        response: Response = delete(endpoint)
+        final_endpoint: str = self._url + endpoint + pk
+        response: Response = delete(final_endpoint)
         return response
