@@ -8,4 +8,5 @@ requests~=2.31.0
 
 # App quality
 mypy~=1.10.0
+types-requests~=2.32.0.20240602
 pytest~=8.2.2
