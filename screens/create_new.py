@@ -14,7 +14,7 @@ from api_clients.api_client import OneOffAPI
 
 # TODO: Shorten import for fields
 from forms.fields.fields import NotBlinkingInput
-from forms.form import OutflowsForm, InflowsForm
+from forms.forms import OutflowsForm, InflowsForm
 from .confirmation_popup import ConfirmPopup
 
 
