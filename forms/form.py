@@ -51,12 +51,14 @@ class BaseFormWidget(Static):
             NotBlinkingInput, {
                 'placeholder': 'Title',
                 'validators': [TitleMax50Validator()],
+                'restrict': r'^.{0,50}$'
             }
         ),
         'value_field': (
             NotBlinkingInput, {
                 'placeholder': 'Value',
                 'validators': [ValueValidator()],
+                'restrict': r'^(0|[1-9]\d{0,14})(\.\d{0,2})?$',
             }
         ),
         'date_field': (
