@@ -8,7 +8,7 @@ from textual.events import Click
 from textual.screen import ModalScreen
 from textual.widgets import Static, Button
 
-from fields.fields import NotBlinkingInput
+from forms.fields.fields import NotBlinkingInput
 from forms.form import OutflowsForm, InflowsForm
 from api_clients.api_client import OneOffAPI
 from screens.confirmation_popup import ConfirmPopup
@@ -60,12 +60,11 @@ class IODetail(ModalScreen):
         self.api = OneOffAPI()
         self.flow_type: Literal['outflows/', 'inflows/'] = flow_type
         self.pk = data.pop('id')
-        self.data = data
 
         if self.flow_type == 'outflows/':
-            self.form: OutflowsForm = OutflowsForm(**self.data)
+            self.form: OutflowsForm = OutflowsForm(data)
         else:
-            self.form: InflowsForm = InflowsForm(**self.data)
+            self.form: InflowsForm = InflowsForm(data)
 
         self.form_default_data: dict = self.form.form_to_dict()  # Holds from initialization
 
