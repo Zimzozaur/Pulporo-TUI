@@ -119,7 +119,7 @@ class AppBody(App):
     BINDINGS = [
         ('ctrl+d', 'toggle_dark', 'Dark Mode'),
         ('ctrl+n', 'create_new', 'Create New'),
-        ('ctrl+o', 'toggle_left_panel', 'Hide Left Menu')
+        ('ctrl+o', 'toggle_left_panel', 'Full Screen')
     ]
     left_menu = True
 
