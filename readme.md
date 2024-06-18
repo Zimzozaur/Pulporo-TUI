@@ -19,7 +19,7 @@
      ```
    - **Windows (PowerShell):**
      ```powershell
-     \venv\Scripts\Activate.ps1
+     .\venv\Scripts\Activate.ps1
      ```
 5. Install dependencies from requirements.txt
    ```
