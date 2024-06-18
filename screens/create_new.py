@@ -6,12 +6,14 @@ from textual.screen import ModalScreen
 from textual.widgets import (
     Button,
     OptionList,
-    Label, Static
+    Static
 )
 from textual.widgets.option_list import Option, Separator
 
 from api_clients.api_client import OneOffAPI
-from fields.fields import NotBlinkingInput
+
+# TODO: Shorten import for fields
+from forms.fields.fields import NotBlinkingInput
 from forms.form import OutflowsForm, InflowsForm
 from .confirmation_popup import ConfirmPopup
 
@@ -52,6 +54,7 @@ class CreateNewPopup(ModalScreen):
         super().__init__(*args, **kwargs)
         self.one_off_api = OneOffAPI()
         self.form = None
+        self.form_name: str = ''
         self.form_default_data = None
         self.options = [
             Option('Outflow One-off', id='outflow-one-off'),
@@ -73,25 +76,30 @@ class CreateNewPopup(ModalScreen):
             if dismiss:
                 self.dismiss()
 
-        clicked_outside_body = self.get_widget_at(event.screen_x, event.screen_y)[0] is self
-        if clicked_outside_body and self.update_validation():
+        clicked_outside_form = self.get_widget_at(event.screen_x, event.screen_y)[0] is self
+
+        if clicked_outside_form and not self.form:
+            # Form was not chosen
             self.dismiss()
-        else:
-            message = 'Are you sure?'
+        elif clicked_outside_form and not self.is_form_changed():
+            # Form was not changed
+            self.dismiss()
+        elif clicked_outside_form and self.is_form_changed():
+            message = 'Do you want to close form?'
             self.app.push_screen(ConfirmPopup(message=message), dismiss_on_true)
 
     @on(Button.Pressed, '#form-cancel-button')
     def remove_form_from_dom(self) -> None:
         """Remove form from dom on cancel button click"""
-        self.form = None
         self.query_one('#popup-form').remove()
         option_list = OptionList(*self.options, id="choose-form")
         self.query_one('#list-form-wrapper').mount(option_list)
+        self.form = None
 
     @on(Button.Pressed, '#form-submit-button')
     def send_request(self) -> None:
         """Send request and remove form from DOM when accepted"""
-        match self.form:
+        match self.form_name:
             case 'outflow-one-off':
                 form = self.query_one(OutflowsForm)
                 self.one_off_api.post_flow('outflows/', form.form_to_dict())
@@ -108,15 +116,17 @@ class CreateNewPopup(ModalScreen):
 
         match selected_option:
             case 'outflow-one-off':
-                self.query_one('#list-form-wrapper').mount(OutflowsForm(id='popup-form'))
+                self.form = OutflowsForm(id='popup-form')
             case 'inflow-one-off':
-                self.query_one('#list-form-wrapper').mount(InflowsForm(id='popup-form'))
+                self.form = InflowsForm(id='popup-form')
 
-        self.form = selected_option
+        self.form_name = selected_option
         self.form_default_data = self.form.form_to_dict()
+        self.query_one('#list-form-wrapper').mount(self.form)
 
     @on(NotBlinkingInput.Changed)
-    def update_validation(self) -> bool:
+    def is_form_changed(self) -> bool:
         if self.form_default_data == self.form.form_to_dict():
-            return True
+            return False
+        return True
 
