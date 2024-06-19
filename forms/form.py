@@ -11,7 +11,7 @@ from .custom_validators import (
     ValueValidator
 )
 from .fields import NotBlinkingTextArea, NotBlinkingInput
-from utils.date_time import format_date_string
+from utils import format_date_string
 
 
 class BaseFormWidget(Static):
