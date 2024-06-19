@@ -13,7 +13,7 @@ from textual.widgets.option_list import Option, Separator
 from api_clients.api_client import OneOffAPI
 
 # TODO: Shorten import for fields
-from forms.fields.fields import NotBlinkingInput
+from forms.fields import NotBlinkingInput
 from forms.forms import OutflowsForm, InflowsForm
 from . import ConfirmPopup
 

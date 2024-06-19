@@ -8,7 +8,7 @@ from textual.events import Click
 from textual.screen import ModalScreen
 from textual.widgets import Static, Button
 
-from forms.fields.fields import NotBlinkingInput
+from forms.fields import NotBlinkingInput
 from forms.forms import OutflowsForm, InflowsForm
 from api_clients.api_client import OneOffAPI
 from screens import ConfirmPopup
