@@ -8,7 +8,7 @@ from textual.widgets import (
     Header,
 )
 
-from screens.create_new import CreateNewPopup
+from screens import CreateNewPopup
 
 from views.dashboard import Dashboard
 from views.ledger import Ledger

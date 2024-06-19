@@ -10,8 +10,8 @@ from textual.widgets import (
 )
 from textual.widgets.data_table import RowKey
 
-from screens.month_year_popup import MonthYearPopup
-from screens.io_detail import IODetail
+from screens import MonthYearPopup
+from screens import IODetail
 
 from api_clients.api_client import OneOffAPI
 
