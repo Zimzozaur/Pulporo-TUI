@@ -13,7 +13,7 @@ from textual.widgets.data_table import RowKey
 from screens import MonthYearPopup
 from screens import IODetail
 
-from api_clients.api_client import OneOffAPI
+from api_clients import OneOffAPI
 
 
 class LedgerTable(Container):
