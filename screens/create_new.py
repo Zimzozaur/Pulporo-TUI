@@ -1,3 +1,6 @@
+from typing import Type
+from collections import namedtuple
+
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Container, VerticalScroll, Center
@@ -59,6 +62,11 @@ class CreateNewPopup(ModalScreen):
             Separator(),
             Option('Inflow One-off', id='inflow-one-off'),
         ]
+        OptionT = namedtuple('OptionT', 'form_class endpoint')
+        self.forms_dict: dict[str, OptionT] = {
+            'outflow-one-off': OptionT(OutflowsForm, 'outflows/'),
+            'inflow-one-off': OptionT(InflowsForm, 'inflows/'),
+        }
 
     def compose(self) -> ComposeResult:
         with Container(id='new-popup-body'):
@@ -97,28 +105,19 @@ class CreateNewPopup(ModalScreen):
     @on(Button.Pressed, '#form-submit-button')
     def send_request(self) -> None:
         """Send request and remove form from DOM when accepted"""
-        match self.form_name:
-            case 'outflow-one-off':
-                form = self.query_one(OutflowsForm)
-                self.one_off_api.post_flow('outflows/', form.form_to_dict())
-            case 'inflow-one-off':
-                form = self.query_one(InflowsForm)
-                self.one_off_api.post_flow('inflows/', form.form_to_dict())
+        f_name = self.form_name  # shorter names for better readability
+        f_dict = self.forms_dict
 
+        form = self.query_one(f_dict[f_name].form_class)
+        self.one_off_api.post_flow(f_dict[f_name].endpoint, form.form_to_dict())
         self.remove_form_from_dom()
 
     def on_option_list_option_selected(self, event: OptionList.OptionSelected) -> None:
-        """Called when Option is clicked"""
-        selected_option = event.option.id
+        """Mount selected form from OptionList to popup"""
         self.query_one('#choose-form').remove()
-
-        match selected_option:
-            case 'outflow-one-off':
-                self.form = OutflowsForm(id='popup-form')
-            case 'inflow-one-off':
-                self.form = InflowsForm(id='popup-form')
-
-        self.form_name = selected_option
+        selected_form_id: str = event.option.id
+        self.form = self.forms_dict[selected_form_id].form_class(id='popup-form')
+        self.form_name = selected_form_id
         self.form_default_data = self.form.form_to_dict()
         self.query_one('#list-form-wrapper').mount(self.form)
 
