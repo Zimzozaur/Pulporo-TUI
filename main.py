@@ -10,13 +10,15 @@ from textual.widgets import (
 
 from screens import CreateNewPopup
 
-from views.dashboard import Dashboard
-from views.ledger import Ledger
-from views.recurring import Recurring
-from views.investment import Investment
-from views.liabilities import Liabilities
-from views.reminders import Reminders
-from views.media import Media
+from views import (
+    Dashboard,
+    Investment,
+    Ledger,
+    Liabilities,
+    Media,
+    Recurring,
+    Reminders
+)
 
 
 class LeftNavMenu(Container):
