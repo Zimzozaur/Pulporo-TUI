@@ -65,7 +65,7 @@ class IODetail(ModalScreen):
         else:
             self.form: InflowsForm = InflowsForm(data)
 
-        self.form_default_data: dict = self.form.form_to_dict()  # Holds from initialization
+        self.form_default_data: dict = self.form.form_to_dict()  # Holds form value from initialization
 
     def compose(self) -> ComposeResult:
         with Container(id='io-detail-body'):
