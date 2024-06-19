@@ -9,7 +9,7 @@ from textual.screen import ModalScreen
 from textual.widgets import Static, Button
 
 from forms.fields import NotBlinkingInput
-from forms.forms import OutflowsForm, InflowsForm
+from forms import OutflowsForm, InflowsForm
 from api_clients import OneOffAPI
 from screens import ConfirmPopup
 
