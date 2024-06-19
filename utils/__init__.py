@@ -1,4 +1,4 @@
-"""Popups used by views"""
+"""Utils provides utility functions for various tasks in the application."""
 
 
 # Local imports.
