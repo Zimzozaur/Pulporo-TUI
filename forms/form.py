@@ -10,7 +10,7 @@ from .custom_validators import (
     DateValidator,
     ValueValidator
 )
-from .fields.fields import NotBlinkingTextArea, NotBlinkingInput
+from .fields import NotBlinkingTextArea, NotBlinkingInput
 from utils.date_time import format_date_string
 
 
