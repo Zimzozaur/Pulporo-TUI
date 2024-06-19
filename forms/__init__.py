@@ -2,10 +2,12 @@
 
 
 # Local imports.
+from .fields import NotBlinkingInput, NotBlinkingTextArea
 from .forms import InflowsForm, OutflowsForm
 
 
 # Public symbols.
 __all__ = [
-    OutflowsForm, InflowsForm
+    NotBlinkingInput, NotBlinkingTextArea,
+    OutflowsForm, InflowsForm,
 ]
