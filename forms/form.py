@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Literal
 
 from textual import on
 from textual.app import ComposeResult
@@ -81,11 +82,13 @@ class BaseFormWidget(Static):
         ),
     }
 
-    FORM_FIELDS: dict | None = None
-    REQUIRED_FIELDS: list | None = None
+    FORM_FIELDS: tuple[tuple[str]] | None = None
+    REQUIRED_FIELDS: tuple | None = None
 
     def __init__(
         self,
+        submit_button_name: Literal['Create', 'Update'],
+        *,
         json: dict = None,
         name: str | None = None,
         id: str | None = None,
@@ -93,28 +96,21 @@ class BaseFormWidget(Static):
         disabled: bool = False,
     ) -> None:
         super().__init__(name=name, id=id, classes=classes, disabled=disabled)
-
-        self.validate_class_attributes()
+        self.submit_button_name: str = submit_button_name
         self.fields = {}
         self.required_fields = {}
         self.json = json
 
-        self.creation_date = self.json.pop('creation_date', None)
-        self.last_modification = self.json.pop('last_modification', None)
+        if self.json:
+            self.creation_date = self.json.pop('creation_date', None)
+            self.last_modification = self.json.pop('last_modification', None)
 
         self.create_fields()
         self.create_required_fields()
 
-    def validate_class_attributes(self):
-        """Validate the presence and types of class attributes."""
-        if not hasattr(self, 'FORM_FIELDS') or not isinstance(self.FORM_FIELDS, dict):
-            raise ValueError('BaseFormWidget subclass must include FORM_FIELDS attribute as a dictionary')
-        if not hasattr(self, 'REQUIRED_FIELDS') or not isinstance(self.REQUIRED_FIELDS, list):
-            raise ValueError('BaseFormWidget subclass must include REQUIRED_FIELDS attribute as a list')
-
     def create_fields(self):
         """Create and populate the fields based on FORM_FIELDS."""
-        for field_name, field_type in self.FORM_FIELDS.items():
+        for field_name, field_type in self.FORM_FIELDS:
             field_class, arguments = self.FIELD_TYPES[field_type]
             field = field_class(**arguments)
             field.id = field_name
@@ -150,7 +146,7 @@ class BaseFormWidget(Static):
         with Horizontal(id='form-action-buttons'):
             yield Button('Cancel', variant='warning', id='form-cancel-button')
             yield Static()
-            yield Button('Submit', variant='success', id='form-submit-button', disabled=True)
+            yield Button(f'{self.submit_button_name}', variant='success', id='form-submit-button', disabled=True)
 
     @on(NotBlinkingInput.Changed)
     def update_required_fields(self, event: NotBlinkingInput.Changed) -> None:

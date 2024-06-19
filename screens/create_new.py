@@ -116,7 +116,7 @@ class CreateNewPopup(ModalScreen):
         """Mount selected form from OptionList to popup"""
         self.query_one('#choose-form').remove()
         selected_form_id: str = event.option.id
-        self.form = self.forms_dict[selected_form_id].form_class(id='popup-form')
+        self.form = self.forms_dict[selected_form_id].form_class('Create', id='popup-form')
         self.form_name = selected_form_id
         self.form_default_data = self.form.form_to_dict()
         self.query_one('#list-form-wrapper').mount(self.form)

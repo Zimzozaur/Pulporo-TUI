@@ -61,9 +61,9 @@ class IODetail(ModalScreen):
         self.pk = data.pop('id')
 
         if self.flow_type == 'outflows/':
-            self.form: OutflowsForm = OutflowsForm(data)
+            self.form: OutflowsForm = OutflowsForm('Update', json=data)
         else:
-            self.form: InflowsForm = InflowsForm(data)
+            self.form: InflowsForm = InflowsForm('Update', json=data)
 
         self.form_default_data: dict = self.form.form_to_dict()  # Holds form value from initialization
 
