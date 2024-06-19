@@ -36,30 +36,25 @@ class LeftNavMenu(Container):
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Change view of the main-app container"""
-        button: str = event.button.id
-        if button == self.clicked:
+        button_id: str = event.button.id
+        if button_id == self.clicked:
             return
 
-        self.get_child_by_id(button, Button).variant = 'primary'
+        self.get_child_by_id(button_id, Button).variant = 'primary'
         self.get_child_by_id(self.clicked, Button).variant = 'default'
+        self.clicked = button_id
 
-        self.clicked = button
-
-        match button:
-            case 'DashboardBt':
-                self.add_and_remove_from_dom(Dashboard, 'dashboard')
-            case 'LedgerBt':
-                self.add_and_remove_from_dom(Ledger, 'ledger')
-            case 'RecurringBt':
-                self.add_and_remove_from_dom(Recurring, 'recurring')
-            case 'InvestmentBt':
-                self.add_and_remove_from_dom(Investment, 'investment')
-            case 'LiabilitiesBt':
-                self.add_and_remove_from_dom(Liabilities, 'liabilities')
-            case 'RemindersBt':
-                self.add_and_remove_from_dom(Reminders, 'reminders')
-            case 'MediaBt':
-                self.add_and_remove_from_dom(Media, 'media')
+        views_dict: dict = {
+            'DashboardBt': (Dashboard, 'dashboard'),
+            'LedgerBt': (Ledger, 'ledger'),
+            'RecurringBt': (Recurring, 'recurring'),
+            'InvestmentBt': (Investment, 'investment'),
+            'LiabilitiesBt': (Liabilities, 'liabilities'),
+            'RemindersBt': (Reminders, 'reminders'),
+            'MediaBt': (Media, 'media')
+        }
+        view_class, view_name = views_dict[button_id]
+        self.add_and_remove_from_dom(view_class, view_name)
 
     def add_and_remove_from_dom(
         self,
