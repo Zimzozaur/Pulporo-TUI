@@ -12,7 +12,6 @@ from textual.widgets.option_list import Option, Separator
 
 from api_clients import OneOffAPI
 
-# TODO: Shorten import for fields
 from forms import OutflowsForm, InflowsForm, NotBlinkingInput
 from . import ConfirmPopup
 
