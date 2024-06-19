@@ -92,44 +92,41 @@ class BaseFormWidget(Static):
         classes: str | None = None,
         disabled: bool = False,
     ) -> None:
-        """
-        Initialize the form widget.
-
-        Args:
-            json (dict, optional): JSON data to populate the form.
-            name (str, optional): Name of the widget.
-            id (str, optional): ID of the widget.
-            classes (str, optional): CSS classes for the widget.
-            disabled (bool, optional): Whether the widget is disabled.
-        """
         super().__init__(name=name, id=id, classes=classes, disabled=disabled)
 
-        if not self.FORM_FIELDS and not isinstance(self.FORM_FIELDS, dict):
-            raise ValueError('BaseFormWidget subclass have to include FIELD_TYPES attribute')
-        if not self.REQUIRED_FIELDS and not isinstance(self.REQUIRED_FIELDS, list):
-            raise ValueError('BaseFormWidget subclass have to include REQUIRED_FIELDS attribute')
-
+        self.validate_class_attributes()
         self.fields = {}
         self.required_fields = {}
         self.json = json
 
-        if self.json is not None:
-            self.creation_date = self.json.pop('creation_date', None)
-            self.last_modification = self.json.pop('last_modification', None)
+        self.creation_date = self.json.pop('creation_date', None)
+        self.last_modification = self.json.pop('last_modification', None)
 
-        # Create Dict of fields and populate them
-        for field_name, field_type in self.FORM_FIELDS:
+        self.create_fields()
+        self.create_required_fields()
+
+    def validate_class_attributes(self):
+        """Validate the presence and types of class attributes."""
+        if not hasattr(self, 'FORM_FIELDS') or not isinstance(self.FORM_FIELDS, dict):
+            raise ValueError('BaseFormWidget subclass must include FORM_FIELDS attribute as a dictionary')
+        if not hasattr(self, 'REQUIRED_FIELDS') or not isinstance(self.REQUIRED_FIELDS, list):
+            raise ValueError('BaseFormWidget subclass must include REQUIRED_FIELDS attribute as a list')
+
+    def create_fields(self):
+        """Create and populate the fields based on FORM_FIELDS."""
+        for field_name, field_type in self.FORM_FIELDS.items():
             field_class, arguments = self.FIELD_TYPES[field_type]
             field = field_class(**arguments)
             field.id = field_name
             self.fields[field_name] = field
-            if json:
+            if self.json:
                 if not isinstance(field, NotBlinkingTextArea):
-                    field.value = json[field_name]
+                    field.value = self.json.get(field_name, '')
                 else:
-                    field.text = json[field_name]
+                    field.text = self.json.get(field_name, '')
 
-        # Create List of required fields
+    def create_required_fields(self):
+        """Create the list of required fields."""
         for field_name in self.REQUIRED_FIELDS:
             self.required_fields[field_name] = False
 
