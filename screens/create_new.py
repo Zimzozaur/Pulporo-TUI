@@ -58,7 +58,7 @@ class CreateNewPopup(ModalScreen):
         self.options = [
             Option('Outflow One-off', id='outflow-one-off'),
             Separator(),
-            # Option('Inflow One-off', id='inflow-one-off'),
+            Option('Inflow One-off', id='inflow-one-off'),
         ]
         OptionT = namedtuple('OptionT', 'form_class endpoint')
         self.forms_dict: dict[str, OptionT] = {

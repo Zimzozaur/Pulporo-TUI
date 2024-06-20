@@ -2,7 +2,6 @@ import pytest
 
 from textual.containers import Container, Center, VerticalScroll
 from textual.widgets import Static, OptionList
-from textual.widgets.option_list import Separator, Option
 
 from screens import CreateNewPopup
 from main import AppBody
