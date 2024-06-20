@@ -1,7 +1,7 @@
 ### In Progress
 
 [//]: # (TODO: Write test suite & add MyPy)
-[//]: # (TODO: Check can I remove Swtich Cases)
+[//]: # (TODO: Figure out how to test api_clients)
 [//]: # (TODO: Create Popup stack to approve flows created automatically by Celery)
 
 ### Scheduled
