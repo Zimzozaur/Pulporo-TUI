@@ -10,3 +10,4 @@ requests~=2.31.0
 mypy~=1.10.0
 types-requests~=2.32.0.20240602
 pytest~=8.2.2
+pytest-textual-snapshot~=0.4.0
