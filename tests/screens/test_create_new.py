@@ -12,7 +12,6 @@ def create_new():
     return CreateNewPopup()
 
 
-@pytest.mark.asyncio
 async def test_pushing_create_new(create_new):
     app = AppBody()
     async with app.run_test():
@@ -20,7 +19,6 @@ async def test_pushing_create_new(create_new):
         assert len(app.screen_stack) == 2
 
 
-@pytest.mark.asyncio
 async def test_create_new_structure(create_new):
     app = AppBody()
     async with app.run_test():
@@ -36,7 +34,6 @@ async def test_create_new_structure(create_new):
         assert create_new.query_one('#form-list', OptionList)
 
 
-@pytest.mark.asyncio
 async def test_click_on_background_dismiss(create_new):
     app = AppBody()
     async with app.run_test(size=(132, 33)) as pilot:

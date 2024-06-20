@@ -9,7 +9,6 @@ from screens import CreateNewPopup
 #              Testing Bindings                #
 ################################################
 
-@pytest.mark.asyncio
 async def test_toggle_left_panel():
     app = AppBody()
     async with app.run_test() as pilot:
@@ -28,7 +27,6 @@ async def test_toggle_left_panel():
         assert main.has_class('-hidden-margin')
 
 
-@pytest.mark.asyncio
 async def test_create_new():
     app = AppBody()
     async with app.run_test() as pilot:
@@ -44,7 +42,6 @@ async def test_create_new():
 ################################################
 
 
-@pytest.mark.asyncio
 async def test_on_mount():
     app = AppBody()
     async with app.run_test(size=(132, 33)):
@@ -62,7 +59,6 @@ view_buttons = (
 )
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize('left_menu_button, el_class', view_buttons)
 async def test_open_view_and_check_button(left_menu_button, el_class):
     app = AppBody()

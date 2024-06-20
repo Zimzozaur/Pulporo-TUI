@@ -11,7 +11,6 @@ def confirm_popup():
     return ConfirmPopup(message="Are you sure?")
 
 
-@pytest.mark.asyncio
 async def test_pushing_create_new(confirm_popup):
     app = AppBody()
     async with app.run_test():
@@ -19,7 +18,6 @@ async def test_pushing_create_new(confirm_popup):
         assert len(app.screen_stack) == 2
 
 
-@pytest.mark.asyncio
 async def test_confirm_popup_structure(confirm_popup):
     app = AppBody()
     async with app.run_test():
@@ -35,7 +33,6 @@ async def test_confirm_popup_structure(confirm_popup):
         assert confirm_popup.query_one("#yes-button", Button).variant == 'success'
 
 
-@pytest.mark.asyncio
 async def test_reject_method(confirm_popup):
     app = AppBody()
     async with app.run_test() as pilot:
@@ -46,7 +43,6 @@ async def test_reject_method(confirm_popup):
         await pilot.click('#no-button')
 
 
-@pytest.mark.asyncio
 async def test_confirm_method(confirm_popup):
     app = AppBody()
     async with app.run_test() as pilot:
