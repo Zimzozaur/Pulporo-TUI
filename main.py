@@ -23,49 +23,46 @@ from views import (
 
 class LeftNavMenu(Container):
     """Menu used to switch between basic views"""
+    MENU_BUTTONS: dict = {
+        'DashboardBt': (Dashboard, 'Dashboard'),
+        'LedgerBt': (Ledger, 'Ledger'),
+        'RecurringBt': (Recurring, 'Recurring'),
+        'InvestmentBt': (Investment, 'Investment'),
+        'LiabilitiesBt': (Liabilities, 'Liabilities'),
+        'RemindersBt': (Reminders, 'Reminders'),
+        'MediaBt': (Media, 'Media'),
+    }
     clicked = 'LedgerBt'
 
     def compose(self) -> ComposeResult:
-        yield Button("Dashboard", id='DashboardBt')
-        yield Button("Ledger", id='LedgerBt', variant="primary")
-        yield Button("Recurring", id='RecurringBt')
-        yield Button("Investment", id='InvestmentBt')
-        yield Button("Liabilities", id='LiabilitiesBt')
-        yield Button("Reminders", id='RemindersBt')
-        yield Button("Media", id='MediaBt')
+        """Compose menu of MENU_BUTTONS"""
+        for bt_id, (view_class, view_name) in self.MENU_BUTTONS.items():
+            yield Button(view_name, id=bt_id)
+
+    def on_mount(self) -> None:
+        """
+        Mark Ledger as primary to indicate opened view
+        Ledger is default on app start
+        """
+        ledgerBt = self.query_one('#LedgerBt')
+        ledgerBt.variant = 'primary'
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Change view of the main-app container"""
         button_id: str = event.button.id
         if button_id == self.clicked:
             return
-
         self.get_child_by_id(button_id, Button).variant = 'primary'
         self.get_child_by_id(self.clicked, Button).variant = 'default'
         self.clicked = button_id
+        self.swap_view(*self.MENU_BUTTONS[button_id])
 
-        views_dict: dict = {
-            'DashboardBt': (Dashboard, 'dashboard'),
-            'LedgerBt': (Ledger, 'ledger'),
-            'RecurringBt': (Recurring, 'recurring'),
-            'InvestmentBt': (Investment, 'investment'),
-            'LiabilitiesBt': (Liabilities, 'liabilities'),
-            'RemindersBt': (Reminders, 'reminders'),
-            'MediaBt': (Media, 'media')
-        }
-        view_class, view_name = views_dict[button_id]
-        self.add_and_remove_from_dom(view_class, view_name)
-
-    def add_and_remove_from_dom(
-        self,
-        cls: Type[Container],
-        element_id: str
-    ) -> None:
-        """Remove Swaps view inside MainApp"""
+    def swap_view(self, view_class: Type[Container], view_name: str) -> None:
+        """Swap view inside MainApp"""
         main_app_wrapper = self.app.query_one('#main-app')
         for child in main_app_wrapper.children:
             child.remove()
-        main_app_wrapper.mount(cls(id=element_id))
+        main_app_wrapper.mount(view_class(id=view_name))
 
 
 class AppBody(App):
@@ -109,7 +106,6 @@ class AppBody(App):
     .-hidden {
         display: none;
     }
-    
     """
 
     TITLE = 'Pulporo 🐙'
@@ -118,14 +114,13 @@ class AppBody(App):
         ('ctrl+n', 'create_new', 'Create New'),
         ('ctrl+o', 'toggle_left_panel', 'Full Screen')
     ]
-    left_menu = True
 
     def compose(self) -> ComposeResult:
         yield Header(show_clock=False)
         with Container(id='body'):
             yield LeftNavMenu(id='left-menu')
             with Container(id='main-app'):
-                yield Ledger(id='ledger')
+                yield Ledger(id='Ledger')
         yield Footer()
 
     def action_create_new(self) -> None:
