@@ -12,11 +12,18 @@ def confirm_popup():
 
 
 @pytest.mark.asyncio
-async def test_confirm_popup_structure(confirm_popup):
+async def test_pushing_create_new(confirm_popup):
     app = AppBody()
     async with app.run_test():
         await app.push_screen(confirm_popup)
         assert len(app.screen_stack) == 2
+
+
+@pytest.mark.asyncio
+async def test_confirm_popup_structure(confirm_popup):
+    app = AppBody()
+    async with app.run_test():
+        await app.push_screen(confirm_popup)
 
         assert confirm_popup.query_one('#confirm-popup-body', Container)
         assert str(confirm_popup.query_one('#confirm-popup-message', Static).renderable) == "Are you sure?"

@@ -1,4 +1,3 @@
-from typing import Type
 from collections import namedtuple
 
 from textual import on
@@ -15,8 +14,7 @@ from textual.widgets.option_list import Option, Separator
 
 from api_clients import OneOffAPI
 
-from forms import OutflowsForm, InflowsForm, NotBlinkingInput
-from . import ConfirmPopup
+from forms import OutflowsForm, InflowsForm
 
 
 class CreateNewPopup(ModalScreen):
@@ -37,13 +35,13 @@ class CreateNewPopup(ModalScreen):
         background: $surface-lighten-1;
     }
     
-    #header-title {
+    #popup-title {
         text-style: bold;
         text-align: center;
         width: 100%;
     }
     
-    #list-form-wrapper {
+    #form-list-wrapper {
         margin-top: 1;
         width: 90%;
         height: 32;
@@ -60,7 +58,7 @@ class CreateNewPopup(ModalScreen):
         self.options = [
             Option('Outflow One-off', id='outflow-one-off'),
             Separator(),
-            Option('Inflow One-off', id='inflow-one-off'),
+            # Option('Inflow One-off', id='inflow-one-off'),
         ]
         OptionT = namedtuple('OptionT', 'form_class endpoint')
         self.forms_dict: dict[str, OptionT] = {
@@ -71,36 +69,24 @@ class CreateNewPopup(ModalScreen):
     def compose(self) -> ComposeResult:
         with Container(id='new-popup-body'):
             with Center():
-                yield Static("CREATE NEW", id='header-title')
+                yield Static("CREATE NEW", id='popup-title')
             with Center():
-                with VerticalScroll(id='list-form-wrapper'):
-                    yield OptionList(*self.options, id="choose-form")
+                with VerticalScroll(id='form-list-wrapper'):
+                    yield OptionList(*self.options, id="form-list")
 
     def on_click(self, event: Click):
         """Close popup when clicked on the background"""
-        def dismiss_on_true(dismiss: bool):
-            if dismiss:
-                self.dismiss()
-
-        clicked_outside_form = self.get_widget_at(event.screen_x, event.screen_y)[0] is self
-
-        if clicked_outside_form and not self.form:
-            # Form was not chosen
+        if self.get_widget_at(event.screen_x, event.screen_y)[0] is self and not self.form:
             self.dismiss()
-        elif clicked_outside_form and not self.is_form_changed():
-            # Form was not changed
-            self.dismiss()
-        elif clicked_outside_form and self.is_form_changed():
-            message = 'Do you want to close form?'
-            self.app.push_screen(ConfirmPopup(message=message), dismiss_on_true)
 
-    @on(Button.Pressed, '#form-cancel-button')
-    def remove_form_from_dom(self) -> None:
-        """Remove form from dom on cancel button click"""
-        self.query_one('#popup-form').remove()
-        option_list = OptionList(*self.options, id="choose-form")
-        self.query_one('#list-form-wrapper').mount(option_list)
-        self.form = None
+    def on_option_list_option_selected(self, event: OptionList.OptionSelected) -> None:
+        """Mount selected form from OptionList to popup"""
+        selected_form_id: str = event.option.id
+        self.query_one('#form-list').remove()
+        self.form = self.forms_dict[selected_form_id].form_class('Create', id='popup-form')
+        self.form_name = selected_form_id
+        self.form_default_data = self.form.form_to_dict()
+        self.query_one('#form-list-wrapper').mount(self.form)
 
     @on(Button.Pressed, '#form-submit-button')
     def send_request(self) -> None:
@@ -112,18 +98,11 @@ class CreateNewPopup(ModalScreen):
         self.one_off_api.post_flow(f_dict[f_name].endpoint, form.form_to_dict())
         self.remove_form_from_dom()
 
-    def on_option_list_option_selected(self, event: OptionList.OptionSelected) -> None:
-        """Mount selected form from OptionList to popup"""
-        self.query_one('#choose-form').remove()
-        selected_form_id: str = event.option.id
-        self.form = self.forms_dict[selected_form_id].form_class('Create', id='popup-form')
-        self.form_name = selected_form_id
-        self.form_default_data = self.form.form_to_dict()
-        self.query_one('#list-form-wrapper').mount(self.form)
-
-    @on(NotBlinkingInput.Changed)
-    def is_form_changed(self) -> bool:
-        if self.form_default_data == self.form.form_to_dict():
-            return False
-        return True
+    @on(Button.Pressed, '#form-cancel-button')
+    def remove_form_from_dom(self) -> None:
+        """Remove form from dom on cancel button click"""
+        self.query_one('#popup-form').remove()
+        option_list = OptionList(*self.options, id="form-list")
+        self.query_one('#form-list-wrapper').mount(option_list)
+        self.form = None
 

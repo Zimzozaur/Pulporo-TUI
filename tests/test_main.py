@@ -47,7 +47,7 @@ async def test_create_new():
 @pytest.mark.asyncio
 async def test_on_mount():
     app = AppBody()
-    async with app.run_test(size=(132, 33)) as pilot:
+    async with app.run_test(size=(132, 33)):
         assert app.query_one('#LedgerBt', Button).variant == 'primary'
 
 
