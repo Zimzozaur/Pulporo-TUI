@@ -1,6 +1,6 @@
 from textual import on
 from textual.app import ComposeResult
-from textual.containers import Container, Horizontal, Center
+from textual.containers import Container, Horizontal
 from textual.screen import ModalScreen
 from textual.widgets import Static, Button
 
@@ -45,15 +45,15 @@ class ConfirmPopup(ModalScreen):
         with Container(id='confirm-popup-body'):
             yield Static(self.message, id='confirm-popup-message')
             with Horizontal(id='confirm-popup-buttons'):
-                yield Button('Reject', variant='error', id='reject-button')
-                yield Button('Confirm', variant='success', id='confirm-button')
+                yield Button('No', variant='error', id='no-button')
+                yield Button('Yes', variant='success', id='yes-button')
 
-    @on(Button.Pressed, '#reject-button')
+    @on(Button.Pressed, '#no-button')
     def reject(self):
         """Return False to callback"""
         self.dismiss(False)
 
-    @on(Button.Pressed, '#confirm-button')
+    @on(Button.Pressed, '#yes-button')
     def confirm(self):
         """Return True to callback"""
         self.dismiss(True)
