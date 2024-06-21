@@ -32,7 +32,7 @@ class LedgerTable(Container):
         table.cursor_type = "row"
 
         if self.table_content == [[]]:
-            table.add_column('Create new records to fill the table 🤭')
+            table.add_column('Create new record to fill the table 🤭')
         else:
             table.add_columns(*self.table_content[0])
             table.add_rows(self.table_content[1:])
@@ -197,23 +197,23 @@ class Ledger(Container):
         flow_data: dict = self.ONE_OFF_API.get_flow(self.endpoint_url, pk=table_row[1])
         self.app.push_screen(IODetail(flow_data, self.endpoint_url), reload_table)
 
-    def request_table_data(self) -> list[list]:
+    def request_table_data(self) -> list[tuple]:
         """
         Call Pulporo endpoint and return a 2D list representing table.
         Each row in the table is numbered sequentially starting from 1.
         If servers returns empty list return empty 2D list.
         """
-        data = self.ONE_OFF_API.get_flow(
+        data: list[dict] = self.ONE_OFF_API.get_flow(
             endpoint=self.endpoint_url,
             param_dict={'year': self.year, 'month': self.month}
         )
 
         if not data:
-            return [[]]
+            return [()]
 
-        headers: tuple = ('No', *data[0])
-        formatted_table: list[list] = [[key.capitalize() for key in headers]]
-        formatted_table.extend([[num, *row.values()] for num, row in enumerate(data, start=1)])
+        # Columns names are extracted from keys of first row (1st row of 2d array)
+        formatted_table: list[tuple] = [('No', *[key.capitalize() for key in data[0]])]
+        formatted_table.extend([(num, *row.values()) for num, row in enumerate(data, start=1)])
         return formatted_table
 
     def reload_table(self) -> None:
