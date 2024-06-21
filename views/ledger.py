@@ -76,7 +76,7 @@ class Ledger(Container):
         scrollbar-gutter: stable;
     }
     """
-
+    ONE_OFF_API = OneOffAPI()
     MONTHS: list[str] = [
         "Jan", "Feb", "Mar", "Apr", "May", "Jun",
         "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
@@ -87,10 +87,6 @@ class Ledger(Container):
         'month': TODAY.month,
     }
     endpoint_url: str = 'outflows/'
-
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self.one_off_api = OneOffAPI()
 
     def compose(self) -> ComposeResult:
         with Container(id='ledger-menu'):
@@ -224,7 +220,7 @@ class Ledger(Container):
         if self.query_one('#outflows', Button).variant == 'primary':
             flow_type = 'outflows/'
 
-        flow_data: dict = self.one_off_api.get_flow(endpoint=flow_type, pk=row[1])
+        flow_data: dict = self.ONE_OFF_API.get_flow(endpoint=flow_type, pk=row[1])
         self.app.push_screen(IODetail(data=flow_data, flow_type=flow_type), reload_table)
 
     def request_table_data(self) -> list[list]:
@@ -238,7 +234,7 @@ class Ledger(Container):
         Returns:
             list[list]: A list of lists representing the table data.
         """
-        list_of_dicts = self.one_off_api.get_flow(
+        list_of_dicts = self.ONE_OFF_API.get_flow(
             endpoint=self.endpoint_url,
             param_dict=self.date
         )
