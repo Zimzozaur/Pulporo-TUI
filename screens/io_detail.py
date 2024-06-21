@@ -69,7 +69,7 @@ class IODetail(ModalScreen):
     def compose(self) -> ComposeResult:
         with Container(id='io-detail-body'):
             with Center():
-                yield Static('UPDATE FLOW', id='header-title')
+                yield Static('UPDATE', id='header-title')
             with Center():
                 with VerticalScroll(id='detail-form-wrapper'):
                     yield self.form
