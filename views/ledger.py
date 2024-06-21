@@ -82,10 +82,8 @@ class Ledger(Container):
         "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
     ]
     TODAY: datetime = datetime.now()
-    date: dict = {
-        'year': TODAY.year,
-        'month': TODAY.month,
-    }
+    year: int = TODAY.year
+    month: int = TODAY.month
     endpoint_url: str = 'outflows/'
 
     def compose(self) -> ComposeResult:
@@ -102,7 +100,7 @@ class Ledger(Container):
             with Horizontal(id='date-section'):
                 yield Button('Prev Month', id='prev-month')
                 yield Button(
-                    f"{self.MONTHS[self.date['month'] - 1]} {self.date['year']}",
+                    f"{self.MONTHS[self.month - 1]} {self.year}",
                     id='month-button'
                 )
                 yield Button('Today', id='today')
@@ -113,13 +111,15 @@ class Ledger(Container):
     @on(Button.Pressed, '#month-button')
     def month_button_pressed(self) -> None:
         """Handle press on month button and open months popup"""
-        def swap_table_to_new_update_month_button(date_changed: bool) -> None:
-            """When month popup is dismissed and date has been changed - date_changed is True"""
-            if date_changed:
-                self.reload_table()
-                self.change_date_on_month_button()
 
-        popup: MonthYearPopup = MonthYearPopup(self.date)
+        def swap_table_to_new_update_month_button(date_tuple) -> None:
+            """When month popup is dismissed and date has been changed - date_changed is True"""
+            if self.year != date_tuple[0] or self.month != date_tuple[1]:
+                self.year, self.month = date_tuple[0], date_tuple[1]
+                self.reload_table()
+                self.update_month_button_label()
+
+        popup: MonthYearPopup = MonthYearPopup(year=self.year, month=self.month)
         self.app.push_screen(popup, swap_table_to_new_update_month_button)
 
     @on(Button.Pressed, '#outflows, #inflows')
@@ -164,39 +164,32 @@ class Ledger(Container):
     def month_section_pressed(self, event: Button.Pressed) -> None:
         """
         Handle press on prev and next month buttons.
-
-        Update the current month and year based on the button pressed
-        ('prev-month' or 'next-month'). It then updates the date displayed on the month
-        button and refreshes the table to reflect the new date.
-
-        Args:
-            event (Button.Pressed): The button press event.
+        Update the date displayed on the month button
+        and reload the table to reflect the new date.
         """
-        button: Button = event.button
-        month_operation: int = -1 if button.id == 'prev-month' else 1
-        self.date['month'] += month_operation
-        if self.date['month'] == 0:
-            self.date['year'] -= 1
-            self.date['month'] = 12
-        elif self.date['month'] == 13:
-            self.date['year'] += 1
-            self.date['month'] = 1
-        self.change_date_on_month_button()
+        month_delta: int = -1 if event.button.id == 'prev-month' else 1
+        self.month += month_delta
+        if self.month == 0:
+            self.year -= 1
+            self.month = 12
+        elif self.month == 13:
+            self.year += 1
+            self.month = 1
+        self.update_month_button_label()
         self.reload_table()
 
     @on(Button.Pressed, '#today')
     def today_button_pressed(self) -> None:
         """
-        Handle press on today button.
-
-        Update the current date to today's date. It then updates the date
-        displayed on the month button and refreshes the table to reflect the new date.
+        Update the current date to today's date. 
+        Updates the date displayed on the month button 
+        and refreshes the table to reflect the new date.
         """
-        if self.date['year'] == self.TODAY.year and self.date['month'] == self.TODAY.month:
+        if self.year == self.TODAY.year and self.month == self.TODAY.month:
             return
-        self.date['year'] = self.TODAY.year
-        self.date['month'] = self.TODAY.month
-        self.change_date_on_month_button()
+        self.year = self.TODAY.year
+        self.month = self.TODAY.month
+        self.update_month_button_label()
         self.reload_table()
 
     @on(DataTable.RowSelected)
@@ -225,30 +218,22 @@ class Ledger(Container):
 
     def request_table_data(self) -> list[list]:
         """
-        Call Pulporo endpoint and return a list to render table.
-
-        Make a request to the Pulporo API endpoint to retrieve data for
-        the table. It formats the data into a list of lists suitable for display in
-        the DataTable. Each row includes a formatted date string for the last two columns.
-
-        Returns:
-            list[list]: A list of lists representing the table data.
+        Call Pulporo endpoint and return a 2D list representing table.
+        Each row in the table is numbered sequentially starting from 1.
+        If servers returns empty list return empty 2D list.
         """
-        list_of_dicts = self.ONE_OFF_API.get_flow(
+        data = self.ONE_OFF_API.get_flow(
             endpoint=self.endpoint_url,
-            param_dict=self.date
+            param_dict={'year': self.year, 'month': self.month}
         )
 
-        # Escape if there is no data
-        if not list_of_dicts:
+        if not data:
             return [[]]
 
-        column_labels: tuple = ('No', *list_of_dicts[0])
-        table_data: list[list] = [[key.capitalize() for key in column_labels]]
-
-        table: list[list] = [[num, *d.values()] for num, d in enumerate(list_of_dicts, start=1)]
-        table_data.extend(table)
-        return table_data
+        headers: tuple = ('No', *data[0])
+        formatted_table: list[list] = [[key.capitalize() for key in headers]]
+        formatted_table.extend([[num, *row.values()] for num, row in enumerate(data, start=1)])
+        return formatted_table
 
     def reload_table(self) -> None:
         """
@@ -275,15 +260,7 @@ class Ledger(Container):
             self.get_widget_by_id(obj_id).variant = 'default'
         bt.variant = 'primary'
 
-    def change_date_on_month_button(self) -> None:
-        """
-        Change the date displayed on the month button.
-
-        This method updates the label of the month button to reflect the current month
-        and year based on `self.date`.
-        """
-        new_name = f"{self.MONTHS[self.date['month'] - 1]} {self.date['year']}"
+    def update_month_button_label(self) -> None:
+        """Updates the label of the month button."""
+        new_name = f"{self.MONTHS[self.month - 1]} {self.year}"
         self.get_widget_by_id('month-button').label = new_name
-
-
-

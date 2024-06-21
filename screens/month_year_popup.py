@@ -33,7 +33,6 @@ class MonthYearPopup(ModalScreen):
         text-style: bold;
     }
     
-    
     .month-bt {
         min-width: 6;
     }
@@ -44,27 +43,25 @@ class MonthYearPopup(ModalScreen):
         text-style: bold;
     }
     """
-
     MONTHS_DICT: dict[str, int] = {
         'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4, 'may': 5, 'jun': 6,
         'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12
     }
-
     MONTHS = [
         "Jan", "Feb", "Mar", "Apr", "May", "Jun",
         "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
     ]
 
-    def __init__(self, date_dict) -> None:
+    def __init__(self, year, month) -> None:
         super().__init__()
-        self.date_dict: dict[str, int] = date_dict
-        self.popup_year: int = self.date_dict['year']
+        self.year = self.popup_year = year
+        self.month = month
 
     def compose(self) -> ComposeResult:
         with Container(id='month-popup-body'):
             with Horizontal(id='year-section'):
                 yield Button('⬅️', id='prev-year', classes='year-bt')
-                yield Button(f'{self.date_dict['year']}', id='popup-year', classes='year-bt')
+                yield Button(f'{self.year}', id='popup-year', classes='year-bt')
                 yield Button('➡️', id='next-year', classes='year-bt')
             with Horizontal():
                 yield Button('Jan', id='jan', classes='month-bt')
@@ -89,9 +86,9 @@ class MonthYearPopup(ModalScreen):
     @on(Button.Pressed, '.month-bt')
     def month_button(self, event: Button.Pressed) -> None:
         """Change query parameters of Ledger"""
-        self.date_dict['month'] = self.MONTHS_DICT[event.button.id]
-        self.date_dict['year'] = self.popup_year
-        self.dismiss(True)
+        self.month = self.MONTHS_DICT[event.button.id]
+        self.year = self.popup_year
+        self.dismiss((self.year, self.month))
 
     @on(Button.Pressed, '#prev-year')
     def change_year_back(self) -> None:
@@ -109,14 +106,14 @@ class MonthYearPopup(ModalScreen):
 
     @on(Button.Pressed, '#popup-year')
     def this_year(self, event: Button.Pressed) -> None:
-        self.popup_year = self.date_dict['year']
+        self.popup_year = self.year
         event.button.label = str(self.popup_year)
         self.color_button_if_this_year()
 
     def on_click(self, event: Click) -> None:
         """Remove widget from DOM when clicked on background"""
         if self.get_widget_at(event.screen_x, event.screen_y)[0] is self:
-            self.dismiss(False)
+            self.dismiss((self.year, self.month))
 
     def color_button_if_this_year(self) -> None:
         """
@@ -125,11 +122,11 @@ class MonthYearPopup(ModalScreen):
         and to default on other year
         """
         def change_color(color: str) -> None:
-            month_abbreviations = self.MONTHS[self.date_dict['month'] - 1].lower()
+            month_abbreviations = self.MONTHS[self.month - 1].lower()
             self.query_one(f"#{month_abbreviations}", Button).variant = color
             self.query_one('#popup-year', Button).variant = color
 
-        if self.popup_year == self.date_dict['year']:
+        if self.popup_year == self.year:
             change_color('primary')
         else:
             change_color('default')
