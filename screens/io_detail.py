@@ -53,18 +53,17 @@ class IODetail(ModalScreen):
         margin-top: 1;
     }
     """
+    FORMS_DICT: dict = {
+        'outflow-one-off': OutflowsForm,
+        'inflow-one-off': InflowsForm,
+    }
 
-    def __init__(self, *args, data: dict, flow_type: Literal['outflows/', 'inflows/'], **kwargs):
+    def __init__(self, data: dict, flow_type: Literal['outflows/', 'inflows/'], *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.api = OneOffAPI()
         self.flow_type: Literal['outflows/', 'inflows/'] = flow_type
         self.pk = data.pop('id')
-
-        if self.flow_type == 'outflows/':
-            self.form: OutflowsForm = OutflowsForm('Update', json=data)
-        else:
-            self.form: InflowsForm = InflowsForm('Update', json=data)
-
+        self.form = self.FORMS_DICT[flow_type]('Update', json=data)
         self.form_default_data: dict = self.form.form_to_dict()  # Holds form value from initialization
 
     def compose(self) -> ComposeResult:
@@ -83,16 +82,13 @@ class IODetail(ModalScreen):
             self.dismiss()
 
     @on(Button.Pressed, '#form-cancel-button')
-    def remove_form_from_dom(self) -> None:
+    def close_popup(self) -> None:
         """Close popup on cancel button click"""
         self.dismiss()
 
     @on(Button.Pressed, '#form-submit-button')
     def patch_io(self) -> None:
-        """
-        Send PATCH request for IO if accepted is True
-        and send back `PATCH` string with dismiss() method
-        """
+        """Send PATCH request for IO and send back `PATCH` string"""
         json: dict = self.form.form_to_dict()
         pk = f'{self.pk}/'
         response: Response = self.api.patch_flow(endpoint=self.flow_type, json=json, pk=pk)
@@ -100,27 +96,22 @@ class IODetail(ModalScreen):
             self.dismiss('PATCH')
 
     @on(Button.Pressed, '#delete-io')
-    def delete_button(self) -> None:
+    def delete_io(self) -> None:
         """
         Display Confirmation Popup to double-check does user want to remove IO
         if yes - send DELETE request, reload ledger and close popup
         else - just close the confirmation popup
-
         """
+        def delete_io(accepted: bool) -> None:
+            """Send DELETE request for IO and send back `PATCH` string"""
+            if not accepted:
+                return
+            response: Response = self.api.delete_flow(self.flow_type, f'{self.pk}/')
+            if response.status_code == 204:
+                self.dismiss('DELETE')
+
         message = 'Do you want to remove this flow?\nYou cannot revers this action.'
-        self.app.push_screen(ConfirmPopup(message=message), self.delete_io)
-
-    def delete_io(self, accepted: bool) -> None:
-        """
-        Send DELETE request for IO if accepted is True
-        and send back `DELETE` string with dismiss() method
-        """
-        if not accepted:
-            return
-        pk = f'{self.pk}/'
-        response: Response = self.api.delete_flow(self.flow_type, pk)
-        if response.status_code == 204:
-            self.dismiss('DELETE')
+        self.app.push_screen(ConfirmPopup(message=message), delete_io)
 
     @on(NotBlinkingInput.Changed)
     def update_validation(self) -> None:
