@@ -17,14 +17,14 @@ def popup():
     return MonthYearPopup(date.year, date.month)
 
 
-async def test_pushing_popup_popup(popup):
+async def test_pushing_month_year_popup(popup):
     app = AppBody()
     async with app.run_test():
         await app.push_screen(popup)
         assert len(app.screen_stack) == 2
 
 
-async def test_popup_popup_structure(popup):
+async def test_month_year_popup_structure(popup):
     app = AppBody()
     async with app.run_test(size=(132, 33)):
         await app.push_screen(popup)
