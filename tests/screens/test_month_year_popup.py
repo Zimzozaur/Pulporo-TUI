@@ -44,7 +44,7 @@ async def test_popup_popup_structure(popup):
             assert 'month-bt' in button.classes, f"Button {month_id} should have class 'month-bt'"
 
         # Check if the popup year button displays the correct year
-        popup_year_button = popup.query_one("#popup-year", Button)
+        popup_year_button = popup.query_one("#this-year", Button)
         assert str(popup_year_button.label) == f'{datetime.now().year}'
 
 
