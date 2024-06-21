@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Literal
+from typing import Literal, Sequence
 
 from textual import on
 from textual.app import ComposeResult
@@ -21,7 +21,7 @@ class LedgerTable(Container):
 
     def __init__(self, table_data):
         super().__init__()
-        self.table_data: list[list] = table_data
+        self.table_content: list[list] = table_data
 
     def compose(self) -> ComposeResult:
         yield DataTable(id='data-table')
@@ -31,11 +31,11 @@ class LedgerTable(Container):
         table.zebra_stripes = True
         table.cursor_type = "row"
 
-        if self.table_data == [[]]:
+        if self.table_content == [[]]:
             table.add_column('Create new records to fill the table 🤭')
         else:
-            table.add_columns(*self.table_data[0])
-            table.add_rows(self.table_data[1:])
+            table.add_columns(*self.table_content[0])
+            table.add_rows(self.table_content[1:])
 
 
 class Ledger(Container):
@@ -46,32 +46,32 @@ class Ledger(Container):
         width: 21%;
         align: left middle;
     }
-    
+
     #type-section {
         layout: horizontal;
         width: 26%;
         align: left middle;
     }
-    
+
     #date-section {
         layout: horizontal;
         width: 53%;
         align: right middle;
     }
-    
+
     #month-button {
         color: $secondary;
     }
-    
+
     #ledger-menu {
         layout: horizontal;
         height: 4;
     }
-    
+
     #ledger-menu Button {
         min-width: 1;
     }
-    
+
     #data-table {
         scrollbar-gutter: stable;
     }
@@ -112,52 +112,41 @@ class Ledger(Container):
     def month_button_pressed(self) -> None:
         """Handle press on month button and open months popup"""
 
-        def swap_table_to_new_update_month_button(date_tuple) -> None:
-            """When month popup is dismissed and date has been changed - date_changed is True"""
-            if self.year != date_tuple[0] or self.month != date_tuple[1]:
-                self.year, self.month = date_tuple[0], date_tuple[1]
-                self.reload_table()
+        def update_table(date_tuple: tuple[int, int]) -> None:
+            """Update table when month popup is dismissed and date has changed"""
+            if (self.year, self.month) != date_tuple:
+                self.year, self.month = date_tuple
                 self.update_month_button_label()
+                self.reload_table()
 
-        popup: MonthYearPopup = MonthYearPopup(year=self.year, month=self.month)
-        self.app.push_screen(popup, swap_table_to_new_update_month_button)
+        popup: MonthYearPopup = MonthYearPopup(self.year, self.month)
+        self.app.push_screen(popup, update_table)
 
     @on(Button.Pressed, '#outflows, #inflows')
     def flow_section_pressed(self, event: Button.Pressed) -> None:
         """
-        Handle press on flow section button.
-
-        Change the type of flow between 'inflows' and 'outflows' based on
-        the button pressed. It updates the endpoint URL accordingly and swaps the table
-        to reflect the new flow type.
-
-        Args:
-            event (Button.Pressed): The button press event.
+        Change the endpoint_url between 'inflows/' and 'outflows/'
+        and reload ledger table
         """
         button: Button = event.button
         if button.variant == 'primary':
             return
+
         self.endpoint_url: Literal['outflows/', 'inflows/'] = 'inflows/' if button.id == 'inflows' else 'outflows/'
-        section = 'outflows', 'inflows'
-        self.all_to_default_one_to_primary(section, button)
+        self.update_button_variants(('outflows', 'inflows'), button)
         self.reload_table()
 
     @on(Button.Pressed, '#one-off, #all, #recurring')
     def type_section_pressed(self, event: Button.Pressed) -> None:
         """
-        Handle press on type section button.
-
         Change the type of flow to 'one-off', 'all', or 'recurring' based
-        on the button pressed. TODO: Implement type type on backend
-
-        Args:
-            event (Button.Pressed): The button press event.
+        on the button pressed. TODO: Implement those types on backend
         """
         button: Button = event.button
         if button.variant == 'primary':
             return
-        section = 'one-off', 'all', 'recurring'
-        self.all_to_default_one_to_primary(section, button)
+
+        self.update_button_variants(('one-off', 'all', 'recurring'), button)
         self.reload_table()
 
     @on(Button.Pressed, '#prev-month, #next-month')
@@ -181,14 +170,13 @@ class Ledger(Container):
     @on(Button.Pressed, '#today')
     def today_button_pressed(self) -> None:
         """
-        Update the current date to today's date. 
-        Updates the date displayed on the month button 
+        Update the current date to today's date.
+        Updates the date displayed on the month button
         and refreshes the table to reflect the new date.
         """
-        if self.year == self.TODAY.year and self.month == self.TODAY.month:
+        if (self.year, self.month) == (self.TODAY.year, self.TODAY.month):
             return
-        self.year = self.TODAY.year
-        self.month = self.TODAY.month
+        self.year, self.month = self.TODAY.year, self.TODAY.month
         self.update_month_button_label()
         self.reload_table()
 
@@ -196,7 +184,6 @@ class Ledger(Container):
     def open_popup_with_details(self, event: DataTable.RowSelected) -> None:
         """
         Open a popup with detailed information about a selected row in the DataTable.
-        Provide a callback function to reload the table if a 'DELETE' or 'PATCH' action was performed.
         """
 
         def reload_table(code: str):
@@ -205,16 +192,10 @@ class Ledger(Container):
                 return
             self.reload_table()
 
-        key: RowKey = event.row_key
-        table: DataTable = self.query_one(DataTable)
-        row: list = table.get_row(key)
-
-        flow_type: Literal['outflows/', 'inflows/'] = 'inflows/'
-        if self.query_one('#outflows', Button).variant == 'primary':
-            flow_type = 'outflows/'
-
-        flow_data: dict = self.ONE_OFF_API.get_flow(endpoint=flow_type, pk=row[1])
-        self.app.push_screen(IODetail(data=flow_data, flow_type=flow_type), reload_table)
+        row_key: RowKey = event.row_key
+        table_row: list = self.query_one(DataTable).get_row(row_key)
+        flow_data: dict = self.ONE_OFF_API.get_flow(self.endpoint_url, pk=table_row[1])
+        self.app.push_screen(IODetail(flow_data, self.endpoint_url), reload_table)
 
     def request_table_data(self) -> list[list]:
         """
@@ -236,27 +217,13 @@ class Ledger(Container):
         return formatted_table
 
     def reload_table(self) -> None:
-        """
-        Remove and mount a new table to the ledger.
-
-        This method removes the existing `LedgerTable` from the UI and mounts a new
-        `LedgerTable` with updated data retrieved from `request_table_data()`.
-        """
+        """Remove and mount a new table to the ledger."""
         self.query_one(LedgerTable).remove()
         self.mount(LedgerTable(table_data=self.request_table_data()))
 
-    def all_to_default_one_to_primary(self, iterable, bt: Button) -> None:
-        """
-        Change all buttons to default variant and the chosen button to primary.
-
-        This method sets the variant of all buttons in the given iterable to 'default'
-        and sets the variant of the specified button to 'primary'.
-
-        Args:
-            iterable: An iterable of button IDs.
-            bt (Button): The button to set as primary.
-        """
-        for obj_id in iterable:
+    def update_button_variants(self, list_of_ids: Sequence[str], bt: Button) -> None:
+        """Change all buttons to default variant and the chosen button to primary."""
+        for obj_id in list_of_ids:
             self.get_widget_by_id(obj_id).variant = 'default'
         bt.variant = 'primary'
 
