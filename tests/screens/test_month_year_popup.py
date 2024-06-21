@@ -35,12 +35,10 @@ async def test_month_year_popup_structure(popup):
         year_buttons = ['prev-year', 'this-year', 'next-year']
         for year_button in year_buttons:
             button = popup.query_one(f"#{year_button}", Button)
-            assert button.id == year_button, f"Button ID should be {year_button}"
             assert 'year-bt' in button.classes, f"Button {year_button} should have class 'year-bt'"
 
         for month_id in MONTH_IDS:
             button = popup.query_one(f"#{month_id}", Button)
-            assert button.id == month_id, f"Button ID should be {month_id}"
             assert 'month-bt' in button.classes, f"Button {month_id} should have class 'month-bt'"
 
         # Check if the popup year button displays the correct year
