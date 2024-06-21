@@ -21,7 +21,7 @@ class OneOffAPI(BasePulporoAPI):
     def get_flow(
         self,
         endpoint: Literal['outflows/', 'inflows/'],
-        param_dict: dict[str, str] | None = None,
+        param_dict: dict[str, int] | None = None,
         pk: int | None = None
     ) -> list[JsonDict] | JsonDict:
         """
