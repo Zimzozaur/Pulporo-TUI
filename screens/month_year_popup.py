@@ -69,7 +69,7 @@ class MonthYearPopup(ModalScreen):
         with Container(id='month-popup-body'):
             with Horizontal(id='year-section'):
                 yield Button('⬅️', id='prev-year', classes='year-bt')
-                yield Button(f'{self.year}', id='popup-year', classes='year-bt')
+                yield Button(f'{self.year}', id='this-year', classes='year-bt')
                 yield Button('➡️', id='next-year', classes='year-bt')
             with Horizontal():
                 yield Button('Jan', id='Jan', classes='month-bt')
@@ -107,17 +107,17 @@ class MonthYearPopup(ModalScreen):
     def change_year_back(self) -> None:
         """Change displayed year to one before"""
         self.popup_year -= 1
-        self.query_one('#popup-year', Button).label = str(self.popup_year)
+        self.query_one('#this-year', Button).label = str(self.popup_year)
         self.update_button_colors_if_current_year()
 
     @on(Button.Pressed, '#next-year')
     def change_year_next(self) -> None:
         """Change displayed year to next"""
         self.popup_year += 1
-        self.query_one('#popup-year', Button).label = str(self.popup_year)
+        self.query_one('#this-year', Button).label = str(self.popup_year)
         self.update_button_colors_if_current_year()
 
-    @on(Button.Pressed, '#popup-year')
+    @on(Button.Pressed, '#this-year')
     def this_year(self, event: Button.Pressed) -> None:
         """Change displayed year to current"""
         self.popup_year = self.year
@@ -132,4 +132,4 @@ class MonthYearPopup(ModalScreen):
         """
         color = 'primary' if self.popup_year == self.year else 'default'
         self.query_one(f"#{self.MONTHS[self.month]}", Button).variant = color
-        self.query_one('#popup-year', Button).variant = color
+        self.query_one('#this-year', Button).variant = color
