@@ -54,8 +54,8 @@ class IODetail(ModalScreen):
     }
     """
     FORMS_DICT: dict = {
-        'outflow-one-off': OutflowsForm,
-        'inflow-one-off': InflowsForm,
+        'outflows/': OutflowsForm,
+        'inflows/': InflowsForm,
     }
 
     def __init__(self, data: dict, flow_type: Literal['outflows/', 'inflows/'], *args, **kwargs):
@@ -78,7 +78,9 @@ class IODetail(ModalScreen):
 
     def on_click(self, event: Click):
         """Close popup when clicked on the background"""
-        if self.get_widget_at(event.screen_x, event.screen_y)[0] is self:
+        background_click = self.get_widget_at(event.screen_x, event.screen_y)[0] is self
+        form_not_changed = self.form_default_data == self.form.form_to_dict()
+        if background_click and form_not_changed:
             self.dismiss()
 
     @on(Button.Pressed, '#form-cancel-button')
