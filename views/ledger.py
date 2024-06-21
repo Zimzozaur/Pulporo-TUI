@@ -120,7 +120,7 @@ class Ledger(Container):
         def swap_table_to_new_update_month_button(date_changed: bool) -> None:
             """When month popup is dismissed and date has been changed - date_changed is True"""
             if date_changed:
-                self.remove_and_mount_new_table()
+                self.reload_table()
                 self.change_date_on_month_button()
 
         popup: MonthYearPopup = MonthYearPopup(self.date)
@@ -144,7 +144,7 @@ class Ledger(Container):
         self.endpoint_url: Literal['outflows/', 'inflows/'] = 'inflows/' if button.id == 'inflows' else 'outflows/'
         section = 'outflows', 'inflows'
         self.all_to_default_one_to_primary(section, button)
-        self.remove_and_mount_new_table()
+        self.reload_table()
 
     @on(Button.Pressed, '#one-off, #all, #recurring')
     def type_section_pressed(self, event: Button.Pressed) -> None:
@@ -162,7 +162,7 @@ class Ledger(Container):
             return
         section = 'one-off', 'all', 'recurring'
         self.all_to_default_one_to_primary(section, button)
-        self.remove_and_mount_new_table()
+        self.reload_table()
 
     @on(Button.Pressed, '#prev-month, #next-month')
     def month_section_pressed(self, event: Button.Pressed) -> None:
@@ -186,7 +186,7 @@ class Ledger(Container):
             self.date['year'] += 1
             self.date['month'] = 1
         self.change_date_on_month_button()
-        self.remove_and_mount_new_table()
+        self.reload_table()
 
     @on(Button.Pressed, '#today')
     def today_button_pressed(self) -> None:
@@ -201,7 +201,7 @@ class Ledger(Container):
         self.date['year'] = self.TODAY.year
         self.date['month'] = self.TODAY.month
         self.change_date_on_month_button()
-        self.remove_and_mount_new_table()
+        self.reload_table()
 
     @on(DataTable.RowSelected)
     def open_popup_with_details(self, event: DataTable.RowSelected) -> None:
@@ -214,7 +214,7 @@ class Ledger(Container):
             """Reloads the DataTable if the given code is 'DELETE' or 'PATCH'."""
             if code != 'DELETE' and code != 'PATCH':
                 return
-            self.remove_and_mount_new_table()
+            self.reload_table()
 
         key: RowKey = event.row_key
         table: DataTable = self.query_one(DataTable)
@@ -254,7 +254,7 @@ class Ledger(Container):
         table_data.extend(table)
         return table_data
 
-    def remove_and_mount_new_table(self) -> None:
+    def reload_table(self) -> None:
         """
         Remove and mount a new table to the ledger.
 

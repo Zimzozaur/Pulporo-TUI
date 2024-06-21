@@ -52,6 +52,7 @@ class CreateNewPopup(ModalScreen):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.one_off_api = OneOffAPI()
+        self.created = False
         self.form = None
         self.form_name: str = ''
         self.form_default_data = None
@@ -77,7 +78,7 @@ class CreateNewPopup(ModalScreen):
     def on_click(self, event: Click):
         """Close popup when clicked on the background"""
         if self.get_widget_at(event.screen_x, event.screen_y)[0] is self and not self.form:
-            self.dismiss()
+            self.dismiss(self.created)
 
     def on_option_list_option_selected(self, event: OptionList.OptionSelected) -> None:
         """Mount selected form from OptionList to popup"""
@@ -97,6 +98,7 @@ class CreateNewPopup(ModalScreen):
         form = self.query_one(f_dict[f_name].form_class)
         self.one_off_api.post_flow(f_dict[f_name].endpoint, form.form_to_dict())
         self.remove_form_from_dom()
+        self.created = True
 
     @on(Button.Pressed, '#form-cancel-button')
     def remove_form_from_dom(self) -> None:

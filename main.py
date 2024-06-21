@@ -131,7 +131,10 @@ class AppBody(App):
         which allows users to input details for new entries to be added
         to the database.
         """
-        self.push_screen(CreateNewPopup('CreateNewPopup'))
+        def reload_if_required(boolean: bool):
+            if boolean and isinstance(self.query_one('#main-app').children[0], Ledger):
+                self.query_one(Ledger).reload_table()
+        self.push_screen(CreateNewPopup('CreateNewPopup'), reload_if_required)
 
     def action_toggle_left_panel(self) -> None:
         """
