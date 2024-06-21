@@ -88,8 +88,8 @@ class BaseFormWidget(Static):
     def __init__(
         self,
         submit_button_name: Literal['Create', 'Update'],
-        *,
         json: dict = None,
+        *,
         name: str | None = None,
         id: str | None = None,
         classes: str | None = None,
