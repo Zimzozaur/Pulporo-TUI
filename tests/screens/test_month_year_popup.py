@@ -1,11 +1,12 @@
 from datetime import datetime
 
 import pytest
+
 from textual.containers import Container, Horizontal
 from textual.widgets import Button
+from textual.app import App
 
 from screens import MonthYearPopup
-from main import AppBody
 
 
 MONTH_IDS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -18,15 +19,15 @@ def popup():
 
 
 async def test_pushing_month_year_popup(popup):
-    app = AppBody()
+    app = App()
     async with app.run_test():
         await app.push_screen(popup)
         assert len(app.screen_stack) == 2
 
 
 async def test_month_year_popup_structure(popup):
-    app = AppBody()
-    async with app.run_test(size=(132, 33)):
+    app = App()
+    async with app.run_test():
         await app.push_screen(popup)
         assert popup.query_one('#month-popup-body', Container)
         assert len(popup.query(Horizontal)) == 4
@@ -47,8 +48,8 @@ async def test_month_year_popup_structure(popup):
 
 
 async def test_coloring_on_mount(popup):
-    app = AppBody()
-    async with app.run_test(size=(132, 33)):
+    app = App()
+    async with app.run_test():
         await app.push_screen(popup)
         assert popup.query_one('#this-year', Button).variant == 'primary'
         month_id = MONTH_IDS[datetime.now().month - 1]
@@ -56,9 +57,9 @@ async def test_coloring_on_mount(popup):
 
 
 async def test_month_button_returns_correct_date(popup):
-    app = AppBody()
+    app = App()
     date = datetime.now()
-    async with app.run_test(size=(132, 33)) as pilot:
+    async with app.run_test() as pilot:
         def check_date(date_tuple: tuple):
             assert (date.year, date.month) == date_tuple
 
@@ -67,9 +68,9 @@ async def test_month_button_returns_correct_date(popup):
 
 
 async def test_change_year_back(popup):
-    app = AppBody()
+    app = App()
     date = datetime.now()
-    async with app.run_test(size=(132, 33)) as pilot:
+    async with app.run_test() as pilot:
         def check_date(date_tuple: tuple):
             assert date.year - 1 == date_tuple[0]
         await app.push_screen(popup, check_date)
@@ -78,9 +79,9 @@ async def test_change_year_back(popup):
 
 
 async def test_change_year_next(popup):
-    app = AppBody()
+    app = App()
     date = datetime.now()
-    async with app.run_test(size=(132, 33)) as pilot:
+    async with app.run_test() as pilot:
         def check_date(date_tuple: tuple):
             assert date.year + 1 == date_tuple[0]
         await app.push_screen(popup, check_date)
@@ -89,9 +90,9 @@ async def test_change_year_next(popup):
 
 
 async def test_change_this_year(popup):
-    app = AppBody()
+    app = App()
     date = datetime.now()
-    async with app.run_test(size=(132, 33)) as pilot:
+    async with app.run_test() as pilot:
         def check_date(date_tuple: tuple):
             assert date.year == date_tuple[0]
         await app.push_screen(popup, check_date)

@@ -1,9 +1,9 @@
 import pytest
+from textual.app import App
 from textual.containers import Container, Horizontal
 from textual.widgets import Static, Button
 
 from screens import ConfirmPopup
-from main import AppBody
 
 
 @pytest.fixture
@@ -12,14 +12,14 @@ def confirm_popup():
 
 
 async def test_pushing_create_new(confirm_popup):
-    app = AppBody()
+    app = App()
     async with app.run_test():
         await app.push_screen(confirm_popup)
         assert len(app.screen_stack) == 2
 
 
 async def test_confirm_popup_structure(confirm_popup):
-    app = AppBody()
+    app = App()
     async with app.run_test():
         await app.push_screen(confirm_popup)
 
@@ -34,7 +34,7 @@ async def test_confirm_popup_structure(confirm_popup):
 
 
 async def test_reject_method(confirm_popup):
-    app = AppBody()
+    app = App()
     async with app.run_test() as pilot:
         def check_callback(boolean: bool):
             assert boolean is False
@@ -44,7 +44,7 @@ async def test_reject_method(confirm_popup):
 
 
 async def test_confirm_method(confirm_popup):
-    app = AppBody()
+    app = App()
     async with app.run_test() as pilot:
         def check_callback(boolean: bool):
             assert boolean is True

@@ -2,9 +2,9 @@ import pytest
 
 from textual.containers import Container, Center, VerticalScroll
 from textual.widgets import Static, OptionList
+from textual.app import App
 
 from screens import CreateNewPopup
-from main import AppBody
 
 
 @pytest.fixture
@@ -13,14 +13,14 @@ def create_new():
 
 
 async def test_pushing_create_new(create_new):
-    app = AppBody()
+    app = App()
     async with app.run_test():
         await app.push_screen(create_new)
         assert len(app.screen_stack) == 2
 
 
 async def test_create_new_structure(create_new):
-    app = AppBody()
+    app = App()
     async with app.run_test():
         await app.push_screen(create_new)
         assert create_new.query_one('#new-popup-body', Container)
@@ -35,7 +35,7 @@ async def test_create_new_structure(create_new):
 
 
 async def test_click_on_background_dismiss(create_new):
-    app = AppBody()
+    app = App()
     async with app.run_test(size=(132, 33)) as pilot:
         assert len(app.screen_stack) == 1
 
