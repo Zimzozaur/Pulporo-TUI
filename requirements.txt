@@ -6,8 +6,11 @@ rich~=13.7.1
 # Utility
 requests~=2.31.0
 
-# App quality
+# Typing
 mypy~=1.10.0
 types-requests~=2.32.0.20240602
+
+# Testing
 pytest~=8.2.2
 pytest-textual-snapshot~=0.4.0
+pytest-mock~=3.14.0
