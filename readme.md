@@ -41,7 +41,7 @@ If you want to read about features [Pulporo API](https://github.com/Zimzozaur/Pu
    ```
    pip install -r requirements.txt
    ```
-6. Run app in terminal - Before run [Pulporo API](https://github.com/Zimzozaur/Pulporo-API) server
+6. Run app in terminal - Before run [Pulporo API](https://github.com/Zimzozaur/Pulporo-TUI?tab=readme-ov-file#project-setup-under-1-min) server
    ```
     python main.py
    ```
