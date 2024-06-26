@@ -10,7 +10,7 @@ With Pulporo, managing finances isn't just about numbers; it's about gaining tru
 If you want to read about features [Pulporo API](https://github.com/Zimzozaur/Pulporo-API)
 
 ## How to install and set up the project
-### Install Python and SQLite (if needed)
+### Install Python (if needed)
 **Python 3.12 Installation:**
    - Download Python 3.12 from the [official Python website](https://www.python.org/downloads/) and follow the installation instructions for your operating system.
 
