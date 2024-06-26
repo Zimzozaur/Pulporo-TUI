@@ -2,7 +2,7 @@ import pytest
 
 from textual.widgets import Button
 
-from main import AppBody
+from main import PulporoApp
 from screens import CreateNewPopup
 from views import Ledger, Media
 
@@ -12,7 +12,7 @@ from views import Ledger, Media
 ################################################
 
 async def test_toggle_left_panel(mocker):
-    app = AppBody()
+    app = PulporoApp()
     mocker.patch.object(Ledger, 'request_table_data', return_value=[[]])
 
     async with app.run_test() as pilot:
@@ -32,7 +32,7 @@ async def test_toggle_left_panel(mocker):
 
 
 async def test_create_new(mocker):
-    app = AppBody()
+    app = PulporoApp()
     mocker.patch.object(Ledger, 'request_table_data', return_value=[[]])
 
     async with app.run_test() as pilot:
@@ -49,7 +49,7 @@ async def test_create_new(mocker):
 
 
 async def test_on_mount(mocker):
-    app = AppBody()
+    app = PulporoApp()
     mocker.patch.object(Ledger, 'request_table_data', return_value=[[]])
 
     async with app.run_test(size=(132, 33)):
@@ -69,7 +69,7 @@ view_buttons = (
 
 @pytest.mark.parametrize('left_menu_button, el_class', view_buttons)
 async def test_open_view_and_check_button(left_menu_button, el_class, mocker):
-    app = AppBody()
+    app = PulporoApp()
     mocker.patch.object(Ledger, 'request_table_data', return_value=[[]])
 
     def compose_mock():

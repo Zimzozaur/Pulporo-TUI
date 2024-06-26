@@ -65,7 +65,7 @@ class LeftNavMenu(Container):
         main_app_wrapper.mount(view_class(id=view_name))
 
 
-class AppBody(App):
+class PulporoApp(App):
     """Container for the whole app"""
     DEFAULT_CSS = """
     #body {
@@ -150,6 +150,6 @@ class AppBody(App):
 
 
 if __name__ == '__main__':
-    app = AppBody()
+    app = PulporoApp()
     app.run()
 

@@ -1,14 +1,11 @@
 from datetime import datetime
-import pytest
 
-from textual.containers import Container, Center, VerticalScroll, Horizontal
-from textual.widgets import Static, OptionList, DataTable, Button
-from textual.widgets.data_table import ColumnKey
+from textual.containers import Horizontal
+from textual.widgets import DataTable, Button
 from textual.app import App
 
-from screens import MonthYearPopup, IODetail
 from views.ledger import LedgerTable, Ledger
-from main import AppBody
+from main import PulporoApp
 
 
 MONTHS: list[str] = [
