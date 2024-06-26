@@ -7,7 +7,7 @@ With Pulporo, managing finances isn't just about numbers; it's about gaining tru
 ![Pulporo-TUI.png](static/Pulporo-TUI.png)
 <small>Disclaimer: The image displayed represents a potential appearance and features of Pulporo. Actual app appearance and functionality may vary. </small>
 
-If you want to read about features [Pulporo API](https://github.com/Zimzozaur/Pulporo-API)
+If you want to read about features [Pulporo API](https://github.com/Zimzozaur/Pulporo-API?tab=readme-ov-file#are-you-tired-of-juggling-between-ugly-spreadsheets-or-dealing-with-shallow-apps-that-offer-confusing-pie-charts)
 
 ## How to install and set up the project
 ### Install Python (if needed)
