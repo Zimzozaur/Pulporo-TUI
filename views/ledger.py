@@ -21,7 +21,7 @@ class LedgerTable(Container):
 
     def __init__(self, table_data):
         super().__init__()
-        self.table_content: list[list] = table_data
+        self.table_content: list[tuple] = table_data
 
     def compose(self) -> ComposeResult:
         yield DataTable(id='data-table')
@@ -31,7 +31,7 @@ class LedgerTable(Container):
         table.zebra_stripes = True
         table.cursor_type = "row"
 
-        if self.table_content == [[]]:
+        if self.table_content == [()]:
             table.add_column('Create new record to fill the table 🤭')
         else:
             table.add_columns(*self.table_content[0])

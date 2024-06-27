@@ -5,7 +5,6 @@ from textual.widgets import DataTable, Button
 from textual.app import App
 
 from views.ledger import LedgerTable, Ledger
-from main import PulporoApp
 
 
 MONTHS: list[str] = [
@@ -18,7 +17,7 @@ MONTHS: list[str] = [
 async def test_empty_ledger_table():
     app = App()
     async with app.run_test():
-        await app.mount(LedgerTable([[]]))
+        await app.mount(LedgerTable([()]))
         data_table = app.query_one(DataTable)
         assert data_table.row_count == 0
 
@@ -41,8 +40,9 @@ async def test_populated_ledger_table():
         assert table_row[1] == 4
 
 
-async def test_ledger_structure():
+async def test_ledger_structure(mocker):
     app = App()
+    mocker.patch.object(Ledger, 'request_table_data', return_value=[()])
     async with app.run_test():
         await app.mount(Ledger())
         assert len(app.query(Horizontal)) == 3
@@ -64,5 +64,4 @@ async def test_ledger_structure():
             assert str(button.label).strip() == bt_name
 
 
-# TODO: Test button presses
 
