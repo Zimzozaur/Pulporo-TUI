@@ -1,3 +1,5 @@
+from typing import cast
+
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal
@@ -99,7 +101,7 @@ class MonthYearPopup(ModalScreen):
     @on(Button.Pressed, '.month-bt')
     def month_button(self, event: Button.Pressed) -> None:
         """Return chosen date"""
-        self.month = self.MONTHS_DICT[event.button.id]
+        self.month = self.MONTHS_DICT[cast(str, event.button.id)]
         self.year = self.popup_year
         self.dismiss((self.year, self.month))
 

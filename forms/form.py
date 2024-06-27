@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Literal
+from typing import Literal, TYPE_CHECKING
 
 from textual import on
 from textual.app import ComposeResult
@@ -13,6 +13,9 @@ from .custom_validators import (
 )
 from .fields import NotBlinkingTextArea, NotBlinkingInput
 from utils import format_date_string
+
+if TYPE_CHECKING:
+    from utils.data_types import JsonDict, FormField
 
 
 class BaseFormWidget(Static):
@@ -46,7 +49,6 @@ class BaseFormWidget(Static):
         padding: 0 1;
     }
     """
-
     FIELD_TYPES: dict[str, tuple] = {
         'title_field': (
             NotBlinkingInput, {
@@ -82,13 +84,12 @@ class BaseFormWidget(Static):
         ),
     }
 
-    FORM_FIELDS: tuple[tuple[str]] | None = None
-    REQUIRED_FIELDS: tuple | None = None
-
+    FORM_FIELDS: tuple[tuple[str, str], ...]
+    REQUIRED_FIELDS: tuple[str, ...]
     def __init__(
         self,
         submit_button_name: Literal['Create', 'Update'],
-        json: dict = None,
+        json: dict | None = None,
         *,
         name: str | None = None,
         id: str | None = None,
@@ -97,8 +98,8 @@ class BaseFormWidget(Static):
     ) -> None:
         super().__init__(name=name, id=id, classes=classes, disabled=disabled)
         self.submit_button_name: str = submit_button_name
-        self.fields = {}
-        self.required_fields = {}
+        self.fields: dict[str, FormField] = {}
+        self.required_fields: dict[str, bool] = {}
         self.json = json
 
         if self.json:
@@ -108,11 +109,11 @@ class BaseFormWidget(Static):
         self.create_fields()
         self.create_required_fields()
 
-    def create_fields(self):
+    def create_fields(self) -> None:
         """Create and populate the fields based on FORM_FIELDS."""
         for field_name, field_type in self.FORM_FIELDS:
             field_class, arguments = self.FIELD_TYPES[field_type]
-            field = field_class(**arguments)
+            field: FormField = field_class(**arguments)
             field.id = field_name
             self.fields[field_name] = field
             if self.json:
@@ -126,9 +127,9 @@ class BaseFormWidget(Static):
         for field_name in self.REQUIRED_FIELDS:
             self.required_fields[field_name] = False
 
-    def form_to_dict(self) -> dict:
+    def form_to_dict(self) -> 'JsonDict':
         """Return a dictionary representation of the form."""
-        form_data = {}
+        form_data: JsonDict = {}
         for field_name, field in self.fields.items():
             field_value = field.text if isinstance(field, NotBlinkingTextArea) else field.value
             form_data[field_name] = field_value
@@ -154,7 +155,7 @@ class BaseFormWidget(Static):
         if event.input.id not in self.REQUIRED_FIELDS:
             return
 
-        if event.validation_result.is_valid:
+        if event.validation_result is not None and event.validation_result.is_valid:
             self.required_fields[event.input.id] = True
         else:
             self.required_fields[event.input.id] = False

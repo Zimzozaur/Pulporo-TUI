@@ -29,7 +29,7 @@ async def test_empty_ledger_table():
 async def test_populated_ledger_table():
     app = App()
     async with app.run_test():
-        await app.mount(LedgerTable([[1, 2], [3, 4]]))
+        await app.mount(LedgerTable([(1, 2), (3, 4)]))
         data_table = app.query_one(DataTable)
         column_keys = list(data_table.columns.keys())
         assert str(data_table.columns[column_keys[0]].label) == '1'

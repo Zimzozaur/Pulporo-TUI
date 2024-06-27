@@ -1,13 +1,13 @@
 import os
 
-from typing import Literal, Optional
+from typing import Literal, TYPE_CHECKING
 
 from requests import (
     get, post, patch, delete,
     Response
 )
 
-JsonDict = dict[str, str | float | int | bool | None]
+from utils.data_types import JsonDict
 
 
 class BasePulporoAPI:
@@ -23,7 +23,7 @@ class OneOffAPI(BasePulporoAPI):
         endpoint: Literal['outflows/', 'inflows/'],
         param_dict: dict[str, int] | None = None,
         pk: int | None = None
-    ) -> list[JsonDict] | JsonDict:
+    ) -> list[JsonDict] | list | JsonDict:
         """
         Retrieve data from the specified endpoint.
 
@@ -33,14 +33,14 @@ class OneOffAPI(BasePulporoAPI):
             pk (int, optional): Primary key to retrieve a specific record. Defaults to None.
 
         Returns:
-            list[dict] | dict: The response data from the endpoint, either a list of dicts or a single dict.
+            list[dict] | list | dict: List of dicts of empty list when get many and dict when call by pk.
         """
         endpoint_url: str = self._url + endpoint
         if pk:
             endpoint_url += f'{pk}/'
 
         response: Response = get(endpoint_url, params=param_dict)
-        list_of_dicts: list[JsonDict] | JsonDict = response.json()
+        list_of_dicts: list[JsonDict] | list | JsonDict = response.json()
         return list_of_dicts
 
     def post_flow(

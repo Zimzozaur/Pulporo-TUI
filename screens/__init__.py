@@ -10,8 +10,8 @@ from .month_year_popup import MonthYearPopup
 
 # Public symbols.
 __all__ = [
-    ConfirmPopup,
-    CreateNewPopup,
-    IODetail,
-    MonthYearPopup
+    'ConfirmPopup',
+    'CreateNewPopup',
+    'IODetail',
+    'MonthYearPopup'
 ]

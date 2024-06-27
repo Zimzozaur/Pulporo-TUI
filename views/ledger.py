@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Literal, Sequence
+from typing import Literal, Sequence, cast, TYPE_CHECKING
 
 from textual import on
 from textual.app import ComposeResult
@@ -15,13 +15,16 @@ from screens import IODetail
 
 from api_clients import OneOffAPI
 
+if TYPE_CHECKING:
+    from utils.data_types import JsonDict
+
 
 class LedgerTable(Container):
     """Hold Table related components"""
 
-    def __init__(self, table_data):
+    def __init__(self, table_data: list[tuple]) -> None:
         super().__init__()
-        self.table_content: list[tuple] = table_data
+        self.table_content = table_data
 
     def compose(self) -> ComposeResult:
         yield DataTable(id='data-table')
@@ -84,7 +87,7 @@ class Ledger(Container):
     TODAY: datetime = datetime.now()
     year: int = TODAY.year
     month: int = TODAY.month
-    endpoint_url: str = 'outflows/'
+    endpoint_url: Literal['outflows/', 'inflows/'] = 'outflows/'
 
     def compose(self) -> ComposeResult:
         with Container(id='ledger-menu'):
@@ -132,7 +135,7 @@ class Ledger(Container):
         if button.variant == 'primary':
             return
 
-        self.endpoint_url: Literal['outflows/', 'inflows/'] = 'inflows/' if button.id == 'inflows' else 'outflows/'
+        self.endpoint_url = 'inflows/' if button.id == 'inflows' else 'outflows/'
         self.update_button_variants(('outflows', 'inflows'), button)
         self.reload_table()
 
@@ -194,7 +197,7 @@ class Ledger(Container):
 
         row_key: RowKey = event.row_key
         table_row: list = self.query_one(DataTable).get_row(row_key)
-        flow_data: dict = self.ONE_OFF_API.get_flow(self.endpoint_url, pk=table_row[1])
+        flow_data: JsonDict = cast('JsonDict', self.ONE_OFF_API.get_flow(self.endpoint_url, pk=table_row[1]))
         self.app.push_screen(IODetail(flow_data, self.endpoint_url), reload_table)
 
     def request_table_data(self) -> list[tuple]:
@@ -203,11 +206,13 @@ class Ledger(Container):
         Each row in the table is numbered sequentially starting from 1.
         If servers returns empty list return empty 2D list.
         """
-        data: list[dict] = self.ONE_OFF_API.get_flow(
-            endpoint=self.endpoint_url,
-            param_dict={'year': self.year, 'month': self.month}
+        data = cast(
+            list['JsonDict'] | list,
+            self.ONE_OFF_API.get_flow(
+                endpoint=self.endpoint_url,
+                param_dict={'year': self.year, 'month': self.month}
+            )
         )
-
         if not data:
             return [()]
 
@@ -224,10 +229,10 @@ class Ledger(Container):
     def update_button_variants(self, list_of_ids: Sequence[str], bt: Button) -> None:
         """Change all buttons to default variant and the chosen button to primary."""
         for obj_id in list_of_ids:
-            self.get_widget_by_id(obj_id).variant = 'default'
+            self.get_widget_by_id(obj_id, Button).variant = 'default'
         bt.variant = 'primary'
 
     def update_month_button_label(self) -> None:
         """Updates the label of the month button."""
         new_name = f"{self.MONTHS[self.month - 1]} {self.year}"
-        self.get_widget_by_id('month-button').label = new_name
+        self.get_widget_by_id('month-button', Button).label = new_name

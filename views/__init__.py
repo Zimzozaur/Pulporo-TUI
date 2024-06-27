@@ -13,11 +13,11 @@ from .reminders import Reminders
 
 # Public symbols.
 __all__ = [
-    Dashboard,
-    Investment,
-    Ledger,
-    Liabilities,
-    Media,
-    Recurring,
-    Reminders,
+    'Dashboard',
+    'Investment',
+    'Ledger',
+    'Liabilities',
+    'Media',
+    'Recurring',
+    'Reminders',
 ]

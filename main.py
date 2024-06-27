@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Type, cast
 
 from textual.app import App, ComposeResult
 from textual.containers import Container
@@ -44,12 +44,12 @@ class LeftNavMenu(Container):
         Mark Ledger as primary to indicate opened view
         Ledger is default on app start
         """
-        ledgerBt = self.query_one('#LedgerBt')
+        ledgerBt = self.query_one('#LedgerBt', Button)
         ledgerBt.variant = 'primary'
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Change view of the main-app container"""
-        button_id: str = event.button.id
+        button_id: str = cast(str, event.button.id)
         if button_id == self.clicked:
             return
         self.get_child_by_id(button_id, Button).variant = 'primary'

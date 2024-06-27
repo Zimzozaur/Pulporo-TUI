@@ -1,4 +1,5 @@
 from collections import namedtuple
+from typing import cast, TYPE_CHECKING
 
 from textual import on
 from textual.app import ComposeResult
@@ -15,6 +16,9 @@ from textual.widgets.option_list import Option, Separator
 from api_clients import OneOffAPI
 
 from forms import OutflowsForm, InflowsForm
+
+if TYPE_CHECKING:
+    from utils.data_types import FormType, JsonDict
 
 
 class CreateNewPopup(ModalScreen):
@@ -49,14 +53,14 @@ class CreateNewPopup(ModalScreen):
     }
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
+        self.form: FormType | None = None
         self.one_off_api = OneOffAPI()
         self.created = False
-        self.form = None
         self.form_name: str = ''
-        self.form_default_data = None
-        self.options = [
+        self.form_default_data: JsonDict | None = None
+        self.options: list[Option | Separator] = [
             Option('Outflow One-off', id='outflow-one-off'),
             Separator(),
             Option('Inflow One-off', id='inflow-one-off'),
@@ -82,9 +86,9 @@ class CreateNewPopup(ModalScreen):
 
     def on_option_list_option_selected(self, event: OptionList.OptionSelected) -> None:
         """Mount selected form from OptionList to popup"""
-        selected_form_id: str = event.option.id
+        selected_form_id: str = cast(str, event.option.id)
         self.query_one('#form-list').remove()
-        self.form = self.forms_dict[selected_form_id].form_class('Create', id='popup-form')
+        self.form = cast(FormType, self.forms_dict[selected_form_id].form_class('Create', id='popup-form'))
         self.form_name = selected_form_id
         self.form_default_data = self.form.form_to_dict()
         self.query_one('#form-list-wrapper').mount(self.form)

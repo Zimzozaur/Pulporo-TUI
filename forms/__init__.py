@@ -8,6 +8,6 @@ from .forms import InflowsForm, OutflowsForm
 
 # Public symbols.
 __all__ = [
-    NotBlinkingInput, NotBlinkingTextArea,
-    OutflowsForm, InflowsForm,
+    'NotBlinkingInput', 'NotBlinkingTextArea',
+    'OutflowsForm', 'InflowsForm',
 ]

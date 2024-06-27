@@ -7,5 +7,5 @@ from .api_client import OneOffAPI
 
 # Public symbols.
 __all__ = [
-    OneOffAPI
+    'OneOffAPI'
 ]
