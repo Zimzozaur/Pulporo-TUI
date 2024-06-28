@@ -86,6 +86,7 @@ class BaseFormWidget(Static):
 
     FORM_FIELDS: tuple[tuple[str, str], ...]
     REQUIRED_FIELDS: tuple[str, ...]
+
     def __init__(
         self,
         submit_button_name: Literal['Create', 'Update'],
@@ -168,5 +169,3 @@ class BaseFormWidget(Static):
     def is_form_valid(self):
         """Check if the form is valid based on the required fields."""
         return all(self.required_fields.values())
-
-

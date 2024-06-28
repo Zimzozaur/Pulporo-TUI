@@ -58,7 +58,7 @@ class IODetail(ModalScreen):
         'inflows/': InflowsForm,
     }
 
-    def __init__(self, data: dict, flow_type: Literal['outflows/', 'inflows/'], *args, **kwargs):
+    def __init__(self, data: dict, flow_type: Literal['outflows/', 'inflows/'], *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.api = OneOffAPI()
         self.flow_type: Literal['outflows/', 'inflows/'] = flow_type
