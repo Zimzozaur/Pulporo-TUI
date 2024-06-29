@@ -46,6 +46,6 @@ If you want to read about features [Pulporo API](https://github.com/Zimzozaur/Pu
     python main.py
    ```
 
-## Find a bug?
+## Found a bug?
 
 If you found an issue or would like to submit an improvement to this project, please submit an issue using the issues tab above. If you would like to submit a PR with a fix, reference the issue you created!
